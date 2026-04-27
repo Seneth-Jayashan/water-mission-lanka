@@ -1,0 +1,83 @@
+---
+import '../styles/global.css';
+import { Image } from 'astro:assets'; 
+import logo from '../assets/logo.png';
+import Navbar from '../components/navbar.astro';
+import service1 from '../assets/service1.jpg';
+import service2 from '../assets/service2.jpg';
+import service3 from '../assets/service3.jpg';
+
+import Footer from '../components/footer.astro';
+
+const services = [
+  {
+    title: "Domestic Water Purification System",
+    description: "Domestic water purification systems are essential for ensuring that the water you use in your home is clean, safe, and free from contaminants. There are several types of water purification systems available, each designed to target specific impurities and meet different needs. Here's a detailed overview of the most common types of domestic water purification systems.",
+    image: service1
+  },
+  {
+    title: "Industrial Water Purification Systems",
+    description: "Industrial water purification systems are crucial for a variety of applications, including manufacturing, pharmaceuticals, food and beverage production, power generation, and more. These systems are designed to handle large volumes of water and remove a wide range of contaminants to meet specific industrial standards and requirements.",
+    image: service2
+  },
+  {
+    title: "Commercial Water Purification Systems",
+    description: "Commercial water purification systems are essential for businesses and public facilities that require large volumes of clean and safe water. These systems are typically more robust than domestic systems but not as large-scale as industrial systems. They serve various sectors including hospitality, healthcare, restaurants, offices, and schools.",
+    image: service3
+  }
+];
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services | Water Mission</title>
+</head>
+<body class="bg-[#f0f9ff] m-0 flex flex-col min-h-screen overflow-x-hidden">
+    <Navbar /> 
+
+<main class="overflow-x-hidden">
+  <section class="bg-[#f0f9ff] py-12 md:py-20 px-6 md:px-12">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-3xl md:text-5xl font-bold text-[#004a7c] text-center mb-12 md:mb-24">
+        Our Water Purification Services
+      </h2>
+
+      <div class="space-y-16 md:space-y-32">
+        {services.map((service, index) => (
+          <div class={`flex flex-col ${index % 2 !== 0 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-8 md:gap-12 lg:gap-24`}>
+            
+            <div class="flex-1 w-full">
+              <div class="rounded-2xl md:rounded-3xl overflow-hidden shadow-xl md:shadow-2xl">
+                <Image 
+                  src={service.image} 
+                  alt={service.title} 
+                  class="w-full h-auto object-cover aspect-[4/3] hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+            </div>
+
+            <div class="flex-1 space-y-4 md:space-y-6 text-center lg:text-left">
+              <h3 class="text-2xl md:text-3xl font-bold text-[#0081c9]">
+                {service.title}
+              </h3>
+              <p class="text-slate-600 leading-relaxed text-base md:text-lg text-justify md:text-left lg:text-justify">
+                {service.description}
+              </p>
+              
+              <div class="pt-4 lg:pt-0">
+                <a href="/contact" class="inline-block bg-white text-[#0081c9] border border-[#0081c9] px-6 py-2 md:px-8 md:py-3 rounded-full font-bold hover:bg-[#0081c9] hover:text-white transition-all">
+                  Inquire Now
+                </a>
+              </div>
+            </div>
+            
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</main>
+
+<Footer />
