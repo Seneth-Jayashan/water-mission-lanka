@@ -124,22 +124,46 @@ const testimonials = [
 
     <main class="flex-grow">
       
-      <section class="bg-blue-50 py-12 px-6 md:py-24 md:px-24 flex flex-col lg:flex-row items-center gap-12">
-        <div class="flex-1 space-y-6 text-center lg:text-left">
-          <span class="inline-block bg-white text-blue-600 px-4 py-1 rounded-full text-sm font-medium border border-blue-100 italic">Premium Water Solutions in Sri Lanka</span>
-          <h1 class="text-4xl md:text-7xl font-bold text-slate-900 leading-tight">Pure Water, <br/> <span class="text-blue-500">Healthy Life</span></h1>
-          <p class="text-slate-600 mx-auto lg:mx-0 max-w-md text-base md:text-lg">We offer free testing of your water to best determine the right service or equipment for you.</p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <a href="/contact" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100 text-center">Request Call</a>
-            <a href="/products" class="border border-blue-300 text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-blue-50 transition text-center">Explore Products</a>
-          </div>
-        </div>
-        <div class="flex-1 flex justify-center w-full">
-          <div class="relative overflow-hidden shadow-2xl w-full max-w-[18rem] md:max-w-[30rem] aspect-[3/4] rounded-[50%_50%_50%_50%_/_60%_60%_40%_40%] bg-[#bfdbfe]">
-            <Image src={heroImg} alt="Healthy water" class="absolute bottom-0 w-full" />
-          </div>
-        </div>
-      </section>
+    <section class="bg-blue-50 py-12 px-6 md:py-24">
+  <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+    
+    <div class="flex-[1.2] space-y-6 text-center lg:text-left">
+      <span class="inline-block bg-white text-blue-600 px-4 py-1 rounded-full text-sm font-medium border border-blue-100 italic">
+        Premium Water Solutions in Sri Lanka
+      </span>
+      
+      <h1 class="text-4xl md:text-6xl xl:text-7xl font-bold text-slate-900 leading-tight">
+        Pure Water, <br/> 
+        <span class="text-blue-500">Healthy Life</span>
+      </h1>
+      
+      <p class="text-slate-600 mx-auto lg:mx-0 max-w-xl text-base md:text-lg">
+        We offer free testing of your water to best determine the right service or equipment for you. 
+        Ensuring your family has access to the cleanest hydration possible.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+        <a href="/contact" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 text-center">
+          Request Call
+        </a>
+        <a href="/products" class="border border-blue-300 text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-blue-100 transition text-center">
+          Explore Products
+        </a>
+      </div>
+    </div>
+
+    <div class="flex-1 flex justify-center lg:justify-end w-full">
+      <div class="relative overflow-hidden shadow-2xl w-full max-w-[22rem] md:max-w-[32rem] aspect-[4/5] rounded-[50%_50%_50%_50%_/_60%_60%_40%_40%] bg-blue-200">
+        <Image 
+          src={heroImg} 
+          alt="Healthy water" 
+          class="absolute bottom-0 w-full h-full object-cover" 
+        />
+      </div>
+    </div>
+
+  </div>
+</section>
 
       <section class="bg-blue-50 py-16 border-t border-blue-100/50">
         <div class="container mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 px-6">
