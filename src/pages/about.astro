@@ -1,0 +1,154 @@
+---
+import '../styles/global.css';
+import { Image } from 'astro:assets'; 
+import logo from '../assets/logo.png';
+import Navbar from '../components/navbar.astro';
+
+import waterPourImage from '../assets/water-pour.jpg'; // Woman with glass image
+import waterIconGraphic from '../assets/water-pour.jpg'; // Small icon inside the blue card
+import ceoPhoto from '../assets/ceo-anil.jpg';
+import footer from '../components/footer.astro';
+import Footer from '../components/footer.astro';
+
+
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Water Mission</title>
+</head>
+<body class="bg-[#f0f9ff] m-0 flex flex-col min-h-screen overflow-x-hidden">
+    <Navbar /> 
+
+<section class="max-w-7xl mx-auto px-6 py-16 md:py-24 font-sans">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+    
+    <div class="space-y-6">
+      <h2 class="text-4xl md:text-5xl font-bold text-[#004a7c]">
+        About Us
+      </h2>
+      
+      <div class="space-y-4 text-gray-600 leading-relaxed text-lg">
+        <p>
+          For over a decade, our skilled technicians have specialized in water treatment technology, 
+          ensuring top-notch service for both residential and commercial needs. Our experts are 
+          readily available to visit your home or institution to provide comprehensive water treatment solutions.
+        </p>
+        
+        <p>
+          We design and install domestic drinking water systems, as well as water treatment systems 
+          for hotels, restaurants, commercial enterprises, industries, hospitals, and facilities 
+          processing vegetables, fruits, meat, and fish. Additionally, we offer a full range of 
+          spare parts and accessories.
+        </p>
+        
+        <p>
+          Our services extend to state-of-the-art water treatment systems and accessories for 
+          swimming pools, laboratories, and hygienic setups for beauty salons and home showers, 
+          all utilizing the latest advancements in water treatment techniques.
+        </p>
+      </div>
+    </div>
+
+    <div class="relative">
+      <div class="overflow-hidden rounded-3xl shadow-xl">
+        <Image 
+            src={waterPourImage} 
+            alt="Water being poured into a glass" 
+            class="w-full h-full object-cover"
+          />
+      </div>
+      <div class="absolute -z-10 -bottom-6 -right-6 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-70"></div>
+    </div>
+
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto py-16 px-6 md:px-12">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+    
+    <div class="relative group">
+      <div class="absolute inset-0 bg-[#37a2dd] translate-x-3 translate-y-3 rounded-[2rem]"></div>
+      
+      <div class="relative bg-[#e6f4fa] p-10 md:p-12 rounded-[2rem] border border-blue-100 h-full">
+        <h2 class="text-3xl font-bold text-[#004a7c] mb-6">Our Mission</h2>
+        <p class="text-slate-700 leading-relaxed text-[15px] text-justify">
+          Our mission is to safeguard and enhance the quality of water resources across Sri Lanka. By deploying advanced water treatment technologies, we aim to deliver safe, clean water to homes, businesses, and public institutions. We are committed to continuous testing and purification of contaminated water, ensuring it meets the highest standards of safety and quality.
+        </p>
+      </div>
+    </div>
+
+    <div class="relative group">
+      <div class="absolute inset-0 bg-[#37a2dd] translate-x-3 translate-y-3 rounded-[2rem]"></div>
+      
+      <div class="relative bg-[#e6f4fa] p-10 md:p-12 rounded-[2rem] border border-blue-100 h-full">
+        <h2 class="text-3xl font-bold text-[#004a7c] mb-6">Our Vision</h2>
+        <p class="text-slate-700 leading-relaxed text-[15px] text-justify">
+          Our vision is to be the leading authority in water treatment solutions, pioneering innovative approaches to water purification and management. We aspire to create a future where every individual in Sri Lanka has access to safe, clean water, thereby improving public health and contributing to the sustainable development of our communities.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="bg-[#72afd3] py-20 px-6 md:px-12 text-white">
+  <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+    
+    <div class="flex-1 space-y-8">
+      <header>
+        <h2 class="text-4xl md:text-5xl font-bold mb-2">Mr. Anil Sellahennadi</h2>
+        <p class="text-xl font-semibold opacity-90">Founder / CEO</p>
+      </header>
+
+      <div class="space-y-6 max-w-2xl border-b border-white/30 pb-8">
+        <p class="leading-relaxed text-lg">
+          Our CEO, Mr. Anil Sellahennadi, leads South Corner (PVT) LTD in its mission to provide cutting-edge water filtration solutions worldwide. Their dedication to innovation and sustainability drives our commitment to ensuring clean, safe drinking water for all.
+        </p>
+      </div>
+
+      <div class="space-y-5">
+        <div class="flex items-center gap-4">
+          <div class="bg-white p-2 rounded-lg"><svg class="w-6 h-6 text-[#72afd3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></div>
+          <a href="mailto:watermissionlanka@gmail.com" class="hover:underline">watermissionlanka@gmail.com</a>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="bg-white p-2 rounded-lg"><svg class="w-6 h-6 text-[#72afd3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg></div>
+          <a href="https://watermissionlanka.lk" target="_blank" class="hover:underline">watermissionlanka.lk</a>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="bg-white p-2 rounded-lg"><svg class="w-6 h-6 text-[#72afd3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg></div>
+          <span>+94 71 724 1720 / +94 70 704 1720</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="bg-white p-2 rounded-lg"><svg class="w-6 h-6 text-[#72afd3]" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg></div>
+          <a href="https://web.facebook.com/kenkowatermissionslanka/?_rdc=1&_rdr#" class="hover:underline">Facebook page</a>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="bg-white p-2 rounded-lg"><svg class="w-6 h-6 text-[#72afd3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+          <span class="text-sm">No 01, Bus Station Commercial Complex, Main Bus Station, Tangalle. 82200 Srilanka</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 flex justify-center">
+      <div class="relative">
+        <div class="w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-white/20 shadow-2xl">
+          <Image 
+            src={ceoPhoto} 
+            alt="Mr. Anil Sellahennadi" 
+            class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<Footer/>

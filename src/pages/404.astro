@@ -1,0 +1,111 @@
+---
+import '../styles/global.css';
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
+
+// Component Imports
+import Footer from '../components/footer.astro';
+
+// Navbar Logic
+const navLinks = [
+  { name: 'Home', href: '/' },
+  { name: 'Products', href: '/products' },
+  { name: 'About', href: '/about' },
+  { name: 'Services', href: '/services' },
+  { name: 'Contact', href: '/contact' },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | Water Mission</title>
+</head>
+<body class="bg-[#fafcfe] m-0 flex flex-col min-h-screen overflow-x-hidden">
+
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+      <nav class="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 md:gap-4 group">
+          <Image src={logo} alt="Logo" class="h-10 md:h-12 w-auto transition-transform group-hover:scale-105" format="webp" />
+          <div class="flex flex-col">
+            <span class="text-lg md:text-xl font-bold text-[#800000] leading-tight uppercase">South Corner</span>
+          </div>
+        </a>
+
+        <ul class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+           {navLinks.map((link) => (
+             <li><a href={link.href} class="hover:text-blue-600 transition-colors">{link.name}</a></li>
+           ))}
+        </ul>
+
+        <button id="mobile-toggle" class="md:hidden p-2 text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      </nav>
+      
+      <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-100 px-6 py-4 space-y-4">
+        {navLinks.map((link) => (
+          <a href={link.href} class="block text-gray-600 font-medium hover:text-blue-600">{link.name}</a>
+        ))}
+      </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center py-12 md:py-20 px-6">
+      <div class="max-w-3xl w-full text-center space-y-6 md:space-y-8">
+        
+        <div class="relative inline-block w-full">
+            <h1 class="text-[8rem] sm:text-[12rem] md:text-[15rem] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-blue-200 to-blue-100 opacity-100 select-none">
+                404
+            </h1>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] shadow-2xl shadow-blue-100/50 border border-blue-50 transform -rotate-3 scale-90 md:scale-100">
+                   <p class="text-xl md:text-2xl font-bold text-[#004a7c]">Oops! Page Lost.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h2 class="text-2xl md:text-4xl font-bold text-slate-800">Something went wrong...</h2>
+            <p class="text-slate-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed">
+                The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+            </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 md:pt-6">
+            <a href="/" class="bg-[#0081c9] text-white px-8 md:px-10 py-3.5 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 hover:bg-[#006ba6] hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto">
+                Back to Homepage
+            </a>
+            <a href="/contact" class="border border-blue-200 text-[#0081c9] bg-white px-8 md:px-10 py-3.5 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 w-full sm:w-auto">
+                Contact Support
+            </a>
+        </div>
+
+        <div class="pt-8 md:pt-12">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 md:mb-6">Popular Pages</p>
+            <div class="flex flex-wrap justify-center gap-x-6 md:gap-x-8 gap-y-3">
+                <a href="/products" class="text-sm font-medium text-slate-600 hover:text-blue-600 underline underline-offset-4 decoration-blue-100 md:no-underline">Our Products</a>
+                <a href="/services" class="text-sm font-medium text-slate-600 hover:text-blue-600 underline underline-offset-4 decoration-blue-100 md:no-underline">Services</a>
+                <a href="/about" class="text-sm font-medium text-slate-600 hover:text-blue-600 underline underline-offset-4 decoration-blue-100 md:no-underline">About CEO</a>
+            </div>
+        </div>
+
+      </div>
+    </main>
+
+    <Footer />
+
+    <script>
+      // Simple toggle for mobile menu
+      const toggle = document.getElementById('mobile-toggle');
+      const menu = document.getElementById('mobile-menu');
+      
+      toggle?.addEventListener('click', () => {
+        menu?.classList.toggle('hidden');
+      });
+    </script>
+</body>
+</html>
