@@ -1,69 +1,260 @@
 ---
 import '../styles/global.css';
-import { Image } from 'astro:assets'; 
 import Navbar from '../components/navbar.astro';
 import Footer from '../components/footer.astro';
-
-import domesticImg from '../assets/domestic_filter.png';
-import commercialImg from '../assets/commercial_filter.png';
-import industrialImg from '../assets/industrial_filter.png';
-import wasteImg from '../assets/water waste treatment.png';
-
-const products = [
-  { name: "Domestic", image: domesticImg },
-  { name: "Commercial", image: commercialImg },
-  { name: "Industrial", image: industrialImg },
-  { name: "Water Waste Treatment", image: wasteImg },
-];
+// Use PUBLIC_API_BASE env var when provided (set in .env as PUBLIC_API_BASE)
+// Default to the local PHP dev server we started on port 8000
+const apiBase = import.meta.env.PUBLIC_API_BASE || 'http://localhost:8000/api';
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products | Water Mission</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="public-api-base" content={apiBase} />
+  <title>Products | Water Mission</title>
 </head>
-<body class="bg-[#f0f9ff] m-0 flex flex-col min-h-screen overflow-x-hidden">
-    <Navbar /> 
+<body class="bg-[#eef8ff] m-0 flex flex-col min-h-screen overflow-x-hidden">
+  <Navbar />
 
-<section class="bg-white py-10 sm:py-12 md:py-16 px-4 sm:px-6 md:px-10">
-  <div class="max-w-7xl mx-auto">
-
-    <!-- Heading -->
-    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#004a7c] mb-8 sm:mb-10 md:mb-12">
-      Products
-    </h2>
-
-    <!-- Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 md:gap-8">
-
-      {products.map((product) => (
-        <div class="bg-white rounded-3xl shadow-md border border-gray-100 flex flex-col p-5 sm:p-6 md:p-8 
-                    transition-all duration-300 
-                    hover:shadow-xl hover:-translate-y-1 active:scale-[0.98]">
-
-          <!-- Image -->
-          <div class="flex items-center justify-center min-h-[160px] sm:min-h-[200px] md:min-h-[240px] mb-4 sm:mb-5 md:mb-6">
-            <Image 
-              src={product.image} 
-              alt={product.name} 
-              class="max-h-[140px] sm:max-h-[180px] md:max-h-[200px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            />
-          </div>
-
-          <!-- Title -->
-          <div class="mt-auto border-t border-gray-100 pt-3 sm:pt-4">
-            <h3 class="text-base sm:text-lg md:text-xl font-semibold text-slate-800 leading-snug">
-              {product.name}
-            </h3>
-          </div>
-
+  <main class="flex-grow py-10 sm:py-14 px-4 sm:px-6 md:px-10">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-sm uppercase tracking-[0.2em] text-[#0076b6] font-semibold">Dynamic Catalog</p>
+          <h1 class="text-3xl md:text-5xl font-bold text-slate-900">Find The Right Product</h1>
         </div>
-      ))}
+        <a href="/contact" class="rounded-full bg-[#0076b6] text-white px-6 py-3 font-semibold hover:bg-[#005e91] transition">Need Expert Help?</a>
+      </div>
 
+      <section class="bg-white rounded-3xl border border-[#d7ebf9] shadow-[0_14px_50px_rgba(0,86,135,0.08)] p-5 md:p-8 mb-8">
+        <form id="filters-form" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end" autocomplete="off">
+          <div class="md:col-span-4">
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="q">Search</label>
+            <input id="q" name="q" class="w-full rounded-xl border border-slate-200 px-4 py-2.5" placeholder="Name or description" />
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="category_id">Category</label>
+            <select id="category_id" name="category_id" class="w-full rounded-xl border border-slate-200 px-4 py-2.5">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="min_price">Min Price</label>
+            <input id="min_price" name="min_price" type="number" min="0" step="0.01" class="w-full rounded-xl border border-slate-200 px-4 py-2.5" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="max_price">Max Price</label>
+            <input id="max_price" name="max_price" type="number" min="0" step="0.01" class="w-full rounded-xl border border-slate-200 px-4 py-2.5" />
+          </div>
+          <div class="md:col-span-1">
+            <label class="block text-sm font-semibold text-slate-700 mb-1" for="sort">Sort</label>
+            <select id="sort" name="sort" class="w-full rounded-xl border border-slate-200 px-2 py-2.5">
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price ↑</option>
+              <option value="price_desc">Price ↓</option>
+              <option value="name_asc">Name A-Z</option>
+              <option value="name_desc">Name Z-A</option>
+            </select>
+          </div>
+          <div class="md:col-span-12 flex gap-3 justify-end pt-2">
+            <button type="button" id="reset-btn" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100">Reset</button>
+            <button type="submit" class="rounded-xl bg-[#0076b6] px-5 py-2 text-white font-semibold hover:bg-[#005e91]">Apply</button>
+          </div>
+        </form>
+      </section>
+
+      <section>
+        <div class="mb-4 flex items-center justify-between">
+          <p id="result-meta" class="text-sm text-slate-600">Loading products...</p>
+        </div>
+
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div id="empty-state" class="hidden rounded-2xl bg-white border border-slate-200 p-10 text-center text-slate-600">
+          No products match your filters.
+        </div>
+
+        <div class="mt-8 flex items-center justify-between">
+          <button id="prev-page" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 disabled:opacity-40" disabled>Previous</button>
+          <p id="page-meta" class="text-sm text-slate-600">Page 1</p>
+          <button id="next-page" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 disabled:opacity-40" disabled>Next</button>
+        </div>
+      </section>
     </div>
+  </main>
 
-  </div>
-</section>
+  <Footer />
 
-<Footer />
+  <script>
+    const API_BASE = (document.querySelector('meta[name="public-api-base"]') || {getAttribute: ()=>'/backend/public/api'}).getAttribute('content');
+    const form = document.getElementById('filters-form');
+    const categorySelect = document.getElementById('category_id');
+    const grid = document.getElementById('product-grid');
+    const emptyState = document.getElementById('empty-state');
+    const resultMeta = document.getElementById('result-meta');
+    const pageMeta = document.getElementById('page-meta');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const resetBtn = document.getElementById('reset-btn');
+
+    let currentPage = 1;
+    let totalPages = 1;
+    const pageSize = 9;
+
+    function currency(value) {
+      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(value || 0);
+    }
+
+    function encodeHtml(s) {
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function normalizeImage(url) {
+      if (!url) return null;
+      try {
+        const asIs = String(url);
+        if (/^https?:\/\//i.test(asIs)) return asIs;
+        // API_BASE is like 'http://localhost:8000/api' -> assets are served under host + '/backend...'
+        const hostBase = API_BASE.replace(/\/api\/?$/i, '');
+        if (asIs.startsWith('/')) return hostBase + asIs;
+        return hostBase + '/' + asIs;
+      } catch (e) {
+        return url;
+      }
+    }
+
+    function getFilterParams() {
+      const fd = new FormData(form);
+      const p = new URLSearchParams();
+      const keys = ['q', 'category_id', 'min_price', 'max_price', 'sort'];
+      for (const key of keys) {
+        const val = (fd.get(key) || '').toString().trim();
+        if (val !== '') p.set(key, val);
+      }
+      p.set('page', String(currentPage));
+      p.set('limit', String(pageSize));
+      return p;
+    }
+
+    function cardTemplate(product) {
+      const badgeHtml = (product.categories || []).map(c => `<span class="inline-block text-xs px-2.5 py-1 rounded-full bg-[#edf7ff] border border-[#cfe9fb] text-[#005f92]">${encodeHtml(c.name)}</span>`).join(' ');
+      const thumbUrl = normalizeImage(product.thumbnail);
+      const imageHtml = thumbUrl
+        ? `<img src="${encodeHtml(thumbUrl)}" alt="${encodeHtml(product.name)}" class="h-48 w-full object-cover" loading="lazy" />`
+        : `<div class="h-48 w-full bg-gradient-to-br from-[#dff2ff] to-[#f1fbff] flex items-center justify-center text-sm text-slate-500">No image</div>`;
+
+      return `
+        <article class="bg-white rounded-3xl overflow-hidden border border-[#d6eaf8] shadow-[0_10px_30px_rgba(0,76,122,0.08)] flex flex-col">
+          ${imageHtml}
+          <div class="p-5 flex flex-col flex-1">
+            <div class="mb-2 flex items-start justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-900">${encodeHtml(product.name)}</h3>
+              <span class="text-xs text-slate-500">${product.image_count || 0} imgs</span>
+            </div>
+            <p class="text-slate-600 text-sm mb-4 line-clamp-3">${encodeHtml(product.description || 'No description available.')}</p>
+            <div class="mb-4 flex flex-wrap gap-2">${badgeHtml}</div>
+            <div class="mt-auto flex items-center justify-between">
+              <p class="text-[#00679e] font-bold text-lg">${currency(product.price)}</p>
+              <a href="/product?id=${encodeURIComponent(product.id)}" class="text-sm font-semibold text-[#0076b6] hover:text-[#005e91]">View Details</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    async function loadCategories() {
+      let data;
+      try {
+        const res = await fetch(`${API_BASE}/categories.php`, { method: 'GET' });
+        if (!res.ok) {
+          console.error('Categories fetch failed', res.status, res.statusText);
+          return;
+        }
+        data = await res.json();
+      } catch (err) {
+        console.error('Categories fetch error', err);
+        resultMeta.textContent = 'Failed to load categories: ' + (err.message || err);
+        return;
+      }
+      const opts = ['<option value="">All Categories</option>'];
+      for (const c of (data.categories || [])) {
+        opts.push(`<option value="${encodeHtml(String(c.id))}">${encodeHtml(c.name)} (${c.product_count})</option>`);
+      }
+      categorySelect.innerHTML = opts.join('');
+    }
+
+    async function loadProducts() {
+      grid.innerHTML = '';
+      resultMeta.textContent = 'Loading...';
+      emptyState.classList.add('hidden');
+
+      const params = getFilterParams();
+      let data;
+      try {
+        const res = await fetch(`${API_BASE}/products.php?${params.toString()}`, { method: 'GET' });
+        if (!res.ok) {
+          const txt = await res.text().catch(()=>null);
+          console.error('Products fetch failed', res.status, res.statusText, txt);
+          resultMeta.textContent = 'Failed to load products: ' + res.status + ' ' + res.statusText;
+          return;
+        }
+
+        data = await res.json();
+      } catch (err) {
+        console.error('Products fetch error', err);
+        resultMeta.textContent = 'Failed to load products: ' + (err.message || err);
+        return;
+      }
+      const products = data.products || [];
+      const meta = data.meta || { page: 1, total_pages: 1, total: 0 };
+      totalPages = Math.max(1, meta.total_pages || 1);
+
+      resultMeta.textContent = `${meta.total || 0} product(s) found`;
+      pageMeta.textContent = `Page ${meta.page || 1} of ${totalPages}`;
+
+      prevPageBtn.disabled = currentPage <= 1;
+      nextPageBtn.disabled = currentPage >= totalPages;
+
+      if (!products.length) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      grid.innerHTML = products.map(cardTemplate).join('');
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      currentPage = 1;
+      loadProducts();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      form.reset();
+      currentPage = 1;
+      loadProducts();
+    });
+
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage -= 1;
+        loadProducts();
+      }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage += 1;
+        loadProducts();
+      }
+    });
+
+    loadCategories().then(loadProducts);
+  </script>
+</html>

@@ -1,0 +1,7 @@
+body { background:#f6f8fa; }
+.card { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+table td { vertical-align: middle; }
+
+.card-img-top { border-bottom:1px solid rgba(0,0,0,0.06); }
+.product-filter { gap: .5rem; }
+

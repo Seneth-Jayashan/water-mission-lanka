@@ -227,6 +227,19 @@ const testimonials = [
         </div>
       </section>
 
+      <section class="bg-white py-16 md:py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
+            <div>
+              <p class="text-sm uppercase tracking-[0.2em] text-[#0076b6] font-semibold">Live Products</p>
+              <h2 class="text-3xl md:text-5xl font-bold text-slate-900">Latest From Our Catalog</h2>
+            </div>
+            <a href="/products" class="bg-[#0076b6] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#005e91] transition">Browse All</a>
+          </div>
+          <div id="home-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+      </section>
+
       <section class="py-16 md:py-20 px-6 bg-white">
         <div class="max-w-7xl mx-auto">
           <h2 class="text-3xl md:text-5xl font-bold text-[#004a7c] text-center mb-12">What Our Customers Say</h2>
@@ -273,6 +286,45 @@ const testimonials = [
     <Footer />
 
     <script>
+      async function loadHomeProducts() {
+        const grid = document.getElementById('home-products-grid');
+        if (!grid) return;
+        const e = (s) => String(s || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+        grid.innerHTML = '<div class="col-span-full text-slate-500">Loading products...</div>';
+        try {
+          const res = await fetch('/backend/public/api/products.php?limit=4&page=1&sort=newest');
+          if (!res.ok) throw new Error('Request failed');
+          const data = await res.json();
+          const products = data.products || [];
+          if (!products.length) {
+            grid.innerHTML = '<div class="col-span-full text-slate-500">No products available yet.</div>';
+            return;
+          }
+          grid.innerHTML = products.map((p) => {
+            const img = p.thumbnail
+              ? `<img src="${e(p.thumbnail)}" alt="${e(p.name)}" class="w-full h-44 object-cover" loading="lazy" />`
+              : `<div class="w-full h-44 bg-[#edf7ff] flex items-center justify-center text-slate-500">No image</div>`;
+            return `
+              <article class="bg-[#f9fcff] rounded-2xl border border-[#d6eaf8] overflow-hidden shadow-sm hover:shadow-lg transition">
+                ${img}
+                <div class="p-4">
+                  <h3 class="font-bold text-slate-900 mb-2">${e(p.name || 'Product')}</h3>
+                  <p class="text-[#00679e] font-semibold mb-3">LKR ${Number(p.price || 0).toFixed(2)}</p>
+                  <a href="/product?id=${encodeURIComponent(p.id)}" class="text-sm font-semibold text-[#0076b6] hover:text-[#005e91]">View Details</a>
+                </div>
+              </article>
+            `;
+          }).join('');
+        } catch (err) {
+          grid.innerHTML = '<div class="col-span-full text-red-600">Unable to load products right now.</div>';
+        }
+      }
+
       function initCounters() {
         const counters = document.querySelectorAll('.counter-value');
         const observer = new IntersectionObserver((entries) => {
@@ -300,8 +352,10 @@ const testimonials = [
         }, { threshold: 0.5 });
         counters.forEach(counter => observer.observe(counter));
       }
+      loadHomeProducts();
       initCounters();
       document.addEventListener('astro:page-load', initCounters);
+      document.addEventListener('astro:page-load', loadHomeProducts);
     </script>
 </body>
 </html>
