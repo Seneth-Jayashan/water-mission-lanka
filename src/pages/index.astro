@@ -286,6 +286,8 @@ const testimonials = [
     <Footer />
 
     <script>
+      const API_BASE = 'http://localhost:8000/api';
+
       async function loadHomeProducts() {
         const grid = document.getElementById('home-products-grid');
         if (!grid) return;
@@ -297,7 +299,7 @@ const testimonials = [
           .replaceAll("'", '&#39;');
         grid.innerHTML = '<div class="col-span-full text-slate-500">Loading products...</div>';
         try {
-          const res = await fetch('/backend/public/api/products.php?limit=4&page=1&sort=newest');
+          const res = await fetch(`${API_BASE}/products.php?limit=4&page=1&sort=newest`);
           if (!res.ok) throw new Error('Request failed');
           const data = await res.json();
           const products = data.products || [];

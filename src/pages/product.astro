@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Navbar from '../components/navbar.astro';
 import Footer from '../components/footer.astro';
 ---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,7 +47,7 @@ import Footer from '../components/footer.astro';
   <Footer />
 
   <script>
-    const API_BASE = '/backend/public/api';
+    const API_BASE = 'http://localhost:8000/api';
     const loadingEl = document.getElementById('loading');
     const notFoundEl = document.getElementById('not-found');
     const shellEl = document.getElementById('product-shell');
