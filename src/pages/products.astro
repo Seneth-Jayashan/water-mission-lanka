@@ -83,7 +83,12 @@ import Footer from '../components/footer.astro';
   <Footer />
 
   <script>
-    const API_BASE = 'http://localhost:8000/api';
+    function getApiBase() {
+      const host = window.location.hostname;
+      return (host === 'localhost' || host === '127.0.0.1') ? 'http://localhost:8000/public/api' : '/public/api';
+    }
+
+    const API_BASE = getApiBase();
     const form = document.getElementById('filters-form');
     const categorySelect = document.getElementById('category_id');
     const grid = document.getElementById('product-grid');
