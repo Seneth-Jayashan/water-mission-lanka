@@ -293,10 +293,17 @@ const testimonials = [
 
         const API_BASE = getApiBase();
 
+        type HomeProduct = {
+          id: number;
+          name?: string | null;
+          price?: number | null;
+          thumbnail?: string | null;
+        };
+
       async function loadHomeProducts() {
-        const grid = document.getElementById('home-products-grid');
+        const grid = document.getElementById('home-products-grid') as HTMLDivElement | null;
         if (!grid) return;
-        const e = (s) => String(s || '')
+        const e = (s: string | number | null | undefined) => String(s || '')
           .replaceAll('&', '&amp;')
           .replaceAll('<', '&lt;')
           .replaceAll('>', '&gt;')
@@ -306,13 +313,13 @@ const testimonials = [
         try {
           const res = await fetch(`${API_BASE}/products.php?limit=4&page=1&sort=newest`);
           if (!res.ok) throw new Error('Request failed');
-          const data = await res.json();
+          const data: { products?: HomeProduct[] } = await res.json();
           const products = data.products || [];
           if (!products.length) {
             grid.innerHTML = '<div class="col-span-full text-slate-500">No products available yet.</div>';
             return;
           }
-          grid.innerHTML = products.map((p) => {
+          grid.innerHTML = products.map((p: HomeProduct) => {
             const img = p.thumbnail
               ? `<img src="${e(p.thumbnail)}" alt="${e(p.name)}" class="w-full h-44 object-cover" loading="lazy" />`
               : `<div class="w-full h-44 bg-[#edf7ff] flex items-center justify-center text-slate-500">No image</div>`;

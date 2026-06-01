@@ -53,15 +53,27 @@ import Footer from '../components/footer.astro';
     }
 
     const API_BASE = getApiBase();
-    const loadingEl = document.getElementById('loading');
-    const notFoundEl = document.getElementById('not-found');
-    const shellEl = document.getElementById('product-shell');
+    const loadingEl = document.getElementById('loading') as HTMLElement | null;
+    const notFoundEl = document.getElementById('not-found') as HTMLElement | null;
+    const shellEl = document.getElementById('product-shell') as HTMLElement | null;
 
-    function money(v) {
-      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(v || 0);
+    type ProductCategory = { id?: number; name: string };
+
+    type ProductImageData = {
+      id: number;
+      name: string;
+      description?: string | null;
+      price?: number | null;
+      thumbnail?: string | null;
+      images?: string[];
+      categories?: ProductCategory[];
+    };
+
+    function money(v: number | string | null | undefined) {
+      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(v || 0));
     }
 
-    function escapeHtml(s) {
+    function escapeHtml(s: string | number | null | undefined) {
       return String(s)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
@@ -70,8 +82,9 @@ import Footer from '../components/footer.astro';
         .replaceAll("'", '&#39;');
     }
 
-    function setMainImage(src, alt) {
-      const main = document.getElementById('main-image');
+    function setMainImage(src: string | null | undefined, alt: string | null | undefined) {
+      const main = document.getElementById('main-image') as HTMLImageElement | null;
+      if (!main) return;
       main.src = src || '';
       main.alt = alt || 'Product image';
     }
@@ -79,60 +92,66 @@ import Footer from '../components/footer.astro';
     async function loadProduct() {
       const productId = new URLSearchParams(location.search).get('id');
       if (!productId || !/^\d+$/.test(productId)) {
-        loadingEl.classList.add('hidden');
-        notFoundEl.classList.remove('hidden');
+        loadingEl?.classList.add('hidden');
+        notFoundEl?.classList.remove('hidden');
         return;
       }
 
       const res = await fetch(`${API_BASE}/products.php?limit=1&page=1&id=${encodeURIComponent(productId)}`);
       if (!res.ok) {
-        loadingEl.classList.add('hidden');
-        notFoundEl.classList.remove('hidden');
+        loadingEl?.classList.add('hidden');
+        notFoundEl?.classList.remove('hidden');
         return;
       }
 
-      const data = await res.json();
+      const data: { products?: ProductImageData[] } = await res.json();
       const list = data.products || [];
-      const p = list.find((item) => String(item.id) === String(productId));
+      const p = list.find((item: ProductImageData) => String(item.id) === String(productId));
       if (!p) {
-        loadingEl.classList.add('hidden');
-        notFoundEl.classList.remove('hidden');
+        loadingEl?.classList.add('hidden');
+        notFoundEl?.classList.remove('hidden');
         return;
       }
 
-      document.getElementById('product-name').textContent = p.name || 'Unnamed Product';
-      document.getElementById('product-price').textContent = money(p.price);
-      document.getElementById('product-description').textContent = p.description || 'No product description available.';
-
+      const productName = document.getElementById('product-name');
+      const productPrice = document.getElementById('product-price');
+      const productDescription = document.getElementById('product-description');
       const badges = document.getElementById('category-badges');
+      const thumbs = document.getElementById('thumbs') as HTMLDivElement | null;
+
+      if (!productName || !productPrice || !productDescription || !badges || !thumbs) return;
+
+      productName.textContent = p.name || 'Unnamed Product';
+      productPrice.textContent = money(p.price);
+      productDescription.textContent = p.description || 'No product description available.';
+
       badges.innerHTML = (p.categories || [])
-        .map((c) => `<span class="inline-block text-xs px-2.5 py-1 rounded-full bg-[#edf7ff] border border-[#cfe9fb] text-[#005f92]">${escapeHtml(c.name)}</span>`)
+        .map((c: ProductCategory) => `<span class="inline-block text-xs px-2.5 py-1 rounded-full bg-[#edf7ff] border border-[#cfe9fb] text-[#005f92]">${escapeHtml(c.name)}</span>`)
         .join('');
 
-      const images = (p.images && p.images.length ? p.images : [p.thumbnail]).filter(Boolean);
+      const images = (p.images && p.images.length ? p.images : [p.thumbnail]).filter((src): src is string => Boolean(src));
       setMainImage(images[0], p.name);
 
-      const thumbs = document.getElementById('thumbs');
-      thumbs.innerHTML = images.map((src, idx) => `
+      thumbs.innerHTML = images.map((src: string, idx: number) => `
         <button type="button" data-src="${escapeHtml(src)}" class="rounded-xl overflow-hidden border ${idx === 0 ? 'border-[#0084cb]' : 'border-slate-200'}">
           <img src="${escapeHtml(src)}" alt="${escapeHtml(p.name)}" class="h-16 w-full object-cover" />
         </button>
       `).join('');
-      thumbs.querySelectorAll('button').forEach((btn) => {
+      thumbs.querySelectorAll('button').forEach((btn: HTMLButtonElement) => {
         btn.addEventListener('click', () => {
           setMainImage(btn.getAttribute('data-src'), p.name);
-          thumbs.querySelectorAll('button').forEach((b) => b.classList.remove('border-[#0084cb]'));
+          thumbs.querySelectorAll('button').forEach((b: HTMLButtonElement) => b.classList.remove('border-[#0084cb]'));
           btn.classList.add('border-[#0084cb]');
         });
       });
 
-      loadingEl.classList.add('hidden');
-      shellEl.classList.remove('hidden');
+      loadingEl?.classList.add('hidden');
+      shellEl?.classList.remove('hidden');
     }
 
     loadProduct().catch(() => {
-      loadingEl.classList.add('hidden');
-      notFoundEl.classList.remove('hidden');
+      loadingEl?.classList.add('hidden');
+      notFoundEl?.classList.remove('hidden');
     });
   </script>
 </body>

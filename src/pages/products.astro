@@ -89,25 +89,41 @@ import Footer from '../components/footer.astro';
     }
 
     const API_BASE = getApiBase();
-    const form = document.getElementById('filters-form');
-    const categorySelect = document.getElementById('category_id');
-    const grid = document.getElementById('product-grid');
-    const emptyState = document.getElementById('empty-state');
-    const resultMeta = document.getElementById('result-meta');
-    const pageMeta = document.getElementById('page-meta');
-    const prevPageBtn = document.getElementById('prev-page');
-    const nextPageBtn = document.getElementById('next-page');
-    const resetBtn = document.getElementById('reset-btn');
+    const form = document.getElementById('filters-form') as HTMLFormElement | null;
+    const categorySelect = document.getElementById('category_id') as HTMLSelectElement | null;
+    const grid = document.getElementById('product-grid') as HTMLDivElement | null;
+    const emptyState = document.getElementById('empty-state') as HTMLDivElement | null;
+    const resultMeta = document.getElementById('result-meta') as HTMLParagraphElement | null;
+    const pageMeta = document.getElementById('page-meta') as HTMLParagraphElement | null;
+    const prevPageBtn = document.getElementById('prev-page') as HTMLButtonElement | null;
+    const nextPageBtn = document.getElementById('next-page') as HTMLButtonElement | null;
+    const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement | null;
 
     let currentPage = 1;
     let totalPages = 1;
     const pageSize = 9;
 
-    function currency(value) {
-      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(value || 0);
+    type CategorySummary = {
+      id: number;
+      name: string;
+      product_count: number;
+    };
+
+    type ProductCard = {
+      id: number;
+      name: string;
+      description?: string | null;
+      price?: number | null;
+      thumbnail?: string | null;
+      image_count?: number | null;
+      categories?: Array<{ id?: number; name: string }>;
+    };
+
+    function currency(value: number | string | null | undefined) {
+      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(value || 0));
     }
 
-    function encodeHtml(s) {
+    function encodeHtml(s: string | number | null | undefined) {
       return String(s)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
@@ -117,6 +133,7 @@ import Footer from '../components/footer.astro';
     }
 
     function getFilterParams() {
+      if (!form) return new URLSearchParams();
       const fd = new FormData(form);
       const p = new URLSearchParams();
       const keys = ['q', 'category_id', 'min_price', 'max_price', 'sort'];
@@ -129,7 +146,7 @@ import Footer from '../components/footer.astro';
       return p;
     }
 
-    function cardTemplate(product) {
+    function cardTemplate(product: ProductCard) {
       const badgeHtml = (product.categories || []).map(c => `<span class="inline-block text-xs px-2.5 py-1 rounded-full bg-[#edf7ff] border border-[#cfe9fb] text-[#005f92]">${encodeHtml(c.name)}</span>`).join(' ');
       const imageHtml = product.thumbnail
         ? `<img src="${encodeHtml(product.thumbnail)}" alt="${encodeHtml(product.name)}" class="h-48 w-full object-cover" loading="lazy" />`
@@ -155,9 +172,10 @@ import Footer from '../components/footer.astro';
     }
 
     async function loadCategories() {
+      if (!categorySelect) return;
       const res = await fetch(`${API_BASE}/categories.php`, { method: 'GET' });
       if (!res.ok) return;
-      const data = await res.json();
+      const data: { categories?: CategorySummary[] } = await res.json();
       const opts = ['<option value="">All Categories</option>'];
       for (const c of (data.categories || [])) {
         opts.push(`<option value="${encodeHtml(String(c.id))}">${encodeHtml(c.name)} (${c.product_count})</option>`);
@@ -166,6 +184,7 @@ import Footer from '../components/footer.astro';
     }
 
     async function loadProducts() {
+      if (!grid || !emptyState || !resultMeta || !pageMeta || !prevPageBtn || !nextPageBtn) return;
       grid.innerHTML = '';
       resultMeta.textContent = 'Loading...';
       emptyState.classList.add('hidden');
@@ -177,7 +196,7 @@ import Footer from '../components/footer.astro';
         return;
       }
 
-      const data = await res.json();
+      const data: { products?: ProductCard[]; meta?: { page?: number; total_pages?: number; total?: number } } = await res.json();
       const products = data.products || [];
       const meta = data.meta || { page: 1, total_pages: 1, total: 0 };
       totalPages = Math.max(1, meta.total_pages || 1);
@@ -196,26 +215,27 @@ import Footer from '../components/footer.astro';
       grid.innerHTML = products.map(cardTemplate).join('');
     }
 
-    form.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', (e: SubmitEvent) => {
       e.preventDefault();
       currentPage = 1;
       loadProducts();
     });
 
-    resetBtn.addEventListener('click', () => {
+    resetBtn?.addEventListener('click', () => {
+      if (!form) return;
       form.reset();
       currentPage = 1;
       loadProducts();
     });
 
-    prevPageBtn.addEventListener('click', () => {
+    prevPageBtn?.addEventListener('click', () => {
       if (currentPage > 1) {
         currentPage -= 1;
         loadProducts();
       }
     });
 
-    nextPageBtn.addEventListener('click', () => {
+    nextPageBtn?.addEventListener('click', () => {
       if (currentPage < totalPages) {
         currentPage += 1;
         loadProducts();
