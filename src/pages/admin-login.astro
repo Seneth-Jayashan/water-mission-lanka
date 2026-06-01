@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout>
+  <main class="container mx-auto px-4 py-12" style="max-width:520px;">
+    <h1 class="text-2xl font-bold mb-6">Admin Login</h1>
+    <form id="login-form" class="space-y-4 bg-white p-6 rounded shadow">
+      <div>
+        <label class="block text-sm font-medium mb-1">Username</label>
+        <input id="username" name="username" class="w-full border rounded px-3 py-2" value="admin" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Password</label>
+        <input id="password" name="password" type="password" class="w-full border rounded px-3 py-2" value="admin123" />
+      </div>
+      <div>
+        <button id="submit" type="submit" class="bg-[#167DB7] text-white px-4 py-2 rounded">Login</button>
+      </div>
+      <div id="message" role="status" class="text-sm mt-2"></div>
+    </form>
+  </main>
+</Layout>
+
+<script type="module">
+const form = document.getElementById('login-form');
+const msg = document.getElementById('message');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.textContent = '';
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    // Use full backend URL so the request reaches the PHP server (not Astro dev server)
+    const BACKEND_URL = 'http://localhost:8000/public/api/login.php';
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    // Try to parse JSON; fallback to text for debugging if server returned HTML
+    const contentType = res.headers.get('content-type') || '';
+    let payload = null;
+    if (contentType.includes('application/json')) {
+      payload = await res.json();
+    } else {
+      const text = await res.text();
+      // Likely PHP source or HTML error — show helpful message
+      msg.textContent = 'Server returned non-JSON response. See console.';
+      console.error('Non-JSON response:', text);
+      return;
+    }
+
+    if (res.ok && payload && payload.success) {
+      msg.textContent = 'Login successful — opening admin panel...';
+      // open admin panel (loads backend session-protected UI)
+      window.location.href = 'http://localhost:8000/public/index.php';
+    } else {
+      msg.textContent = payload?.error || 'Login failed';
+    }
+  } catch (err) {
+    msg.textContent = 'Network error';
+    console.error(err);
+  }
+});
+</script>
