@@ -3,31 +3,39 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout pageTitle="Products">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-    <div class="search-bar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" placeholder="Search products..." id="product-search" />
+  <div class="page-stack">
+    <div class="page-toolbar">
+      <div class="page-heading">
+        <h2>Products</h2>
+        <p>Create, search, edit, and organize product listings.</p>
+      </div>
+      <div class="toolbar-actions">
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search products..." id="product-search" />
+        </div>
+        <button class="btn btn-primary" id="add-product-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Add Product
+        </button>
+      </div>
     </div>
-    <button class="btn btn-primary" id="add-product-btn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-      Add Product
-    </button>
-  </div>
-  <div class="card">
-    <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Image</th><th>Name</th><th>Price (LKR)</th><th>Categories</th><th>Images</th><th style="width:120px;">Actions</th></tr></thead>
-        <tbody id="products-table-body"><tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">Loading...</td></tr></tbody>
-      </table>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Image</th><th>Name</th><th>Price (LKR)</th><th>Categories</th><th>Images</th><th style="width:180px;">Actions</th></tr></thead>
+          <tbody id="products-table-body"><tr><td colspan="6"><div class="empty-state">Loading products...</div></td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Product Modal -->
   <div class="modal-overlay" id="product-modal">
     <div class="modal">
       <div class="modal-header">
         <h3 id="product-modal-title">Add Product</h3>
-        <button class="btn-icon" onclick="closeModal('product-modal')">
+        <button class="btn-icon" onclick="closeModal('product-modal')" aria-label="Close product modal">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -35,20 +43,20 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <form id="product-form" enctype="multipart/form-data">
           <input type="hidden" id="pf-id" name="id" />
           <div class="form-group">
-            <label>Product Name *</label>
+            <label for="pf-name">Product Name *</label>
             <input type="text" class="form-control" id="pf-name" name="name" required />
           </div>
           <div class="form-group">
-            <label>Description</label>
+            <label for="pf-desc">Description</label>
             <textarea class="form-control" id="pf-desc" name="description"></textarea>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Price (LKR) *</label>
+              <label for="pf-price">Price (LKR) *</label>
               <input type="number" step="0.01" min="0" class="form-control" id="pf-price" name="price" required />
             </div>
             <div class="form-group">
-              <label>Categories</label>
+              <label for="pf-categories">Categories</label>
               <select multiple class="form-control" id="pf-categories" name="category_ids[]"></select>
               <div class="form-hint">Hold Ctrl/Cmd to select multiple</div>
             </div>
@@ -58,7 +66,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             <div class="image-preview-grid" id="pf-existing-images"></div>
           </div>
           <div class="form-group">
-            <label>Add Images</label>
+            <label for="pf-images">Add Images</label>
             <input type="file" class="form-control" id="pf-images" name="images[]" accept="image/jpeg,image/png,image/webp" multiple />
             <div class="form-hint">Max 2MB each. JPG, PNG, or WEBP.</div>
           </div>
@@ -74,12 +82,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
     </div>
   </div>
 
-  <!-- Delete Confirm Modal -->
   <div class="modal-overlay" id="delete-modal">
     <div class="modal" style="max-width:400px;">
       <div class="modal-header">
         <h3>Confirm Delete</h3>
-        <button class="btn-icon" onclick="closeModal('delete-modal')">
+        <button class="btn-icon" onclick="closeModal('delete-modal')" aria-label="Close delete modal">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
@@ -104,43 +111,45 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         const data = await res.json();
         allProducts = data.products || [];
         renderProducts(allProducts);
-      } catch (err) {
-        document.getElementById('products-table-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:40px;">Failed to load products</td></tr>';
+      } catch {
+        document.getElementById('products-table-body').innerHTML = '<tr><td colspan="6"><div class="empty-state" style="color:var(--danger);">Failed to load products</div></td></tr>';
       }
     }
 
     function renderProducts(products) {
       const tbody = document.getElementById('products-table-body');
       if (!products.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px;">No products found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><strong>No products found</strong>Add a product or adjust your search.</div></td></tr>';
         return;
       }
+
       tbody.innerHTML = products.map(p => {
         const thumb = p.thumbnail
           ? `<img src="${window.esc(p.thumbnail)}" alt="${window.esc(p.name)}" class="thumb" />`
-          : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:10px;">N/A</div>`;
-        const cats = (p.categories || []).map(c => `<span class="badge badge-purple">${window.esc(c.name)}</span>`).join(' ');
+          : '<div class="thumb thumb-empty">N/A</div>';
+        const cats = (p.categories || []).map(c => `<span class="badge badge-purple">${window.esc(c.name)}</span>`).join('');
         return `<tr>
           <td>${thumb}</td>
-          <td><strong>${window.esc(p.name)}</strong></td>
+          <td><span class="row-title">${window.esc(p.name)}</span></td>
           <td>${Number(p.price).toFixed(2)}</td>
-          <td>${cats || '<span style="color:var(--text-dim)">—</span>'}</td>
+          <td><div class="category-list">${cats || '<span class="row-muted">--</span>'}</div></td>
           <td><span class="badge badge-blue">${p.image_count || 0}</span></td>
           <td>
-            <button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})" title="Edit">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Edit
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteProduct(${p.id}, '${window.esc(p.name).replace(/'/g,"\\'")}')" title="Delete" style="margin-left:4px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-              Del
-            </button>
+            <div class="action-group">
+              <button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})" title="Edit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDeleteProduct(${p.id}, '${window.esc(p.name).replace(/'/g,"\\'")}')" title="Delete">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                Delete
+              </button>
+            </div>
           </td>
         </tr>`;
       }).join('');
     }
 
-    // Search products
     document.getElementById('product-search').addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase();
       const filtered = allProducts.filter(p =>
@@ -149,7 +158,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       renderProducts(filtered);
     });
 
-    // Add product
     document.getElementById('add-product-btn').addEventListener('click', () => {
       document.getElementById('product-modal-title').textContent = 'Add Product';
       document.getElementById('product-form').reset();
@@ -172,7 +180,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       } catch { /* ignore */ }
     }
 
-    // Edit product
     window.editProduct = async function(id) {
       const p = allProducts.find(x => x.id === id);
       if (!p) return;
@@ -186,15 +193,14 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const selectedCatIds = (p.categories || []).map(c => c.id);
       await loadCategoryOptions(selectedCatIds);
 
-      // Show existing images
       const existingGroup = document.getElementById('pf-existing-images-group');
       const existingGrid = document.getElementById('pf-existing-images');
       if (p.images && p.images.length) {
         existingGroup.style.display = 'block';
-        existingGrid.innerHTML = p.images.map((imgUrl, i) =>
+        existingGrid.innerHTML = p.images.map(imgUrl =>
           `<div class="image-preview-item" data-img-url="${window.esc(imgUrl)}">
             <img src="${window.esc(imgUrl)}" alt="Product image" />
-            <button type="button" class="remove-btn" onclick="this.parentElement.remove()" title="Mark for removal">×</button>
+            <button type="button" class="remove-btn" onclick="this.parentElement.remove()" title="Mark for removal">&times;</button>
           </div>`
         ).join('');
       } else {
@@ -205,7 +211,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       window.openModal('product-modal');
     };
 
-    // Save product
     document.getElementById('product-save-btn').addEventListener('click', async () => {
       const saveBtn = document.getElementById('product-save-btn');
       const saveText = document.getElementById('product-save-text');
@@ -227,13 +232,11 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       formData.append('description', document.getElementById('pf-desc').value);
       formData.append('price', price);
 
-      // Categories
       const catSelect = document.getElementById('pf-categories');
       for (const opt of catSelect.selectedOptions) {
         formData.append('category_ids[]', opt.value);
       }
 
-      // New images
       const fileInput = document.getElementById('pf-images');
       if (fileInput.files.length) {
         for (const file of fileInput.files) {
@@ -255,7 +258,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         } else {
           window.showToast((data.errors || ['Save failed']).join(', '), 'error');
         }
-      } catch (err) {
+      } catch {
         window.showToast('Network error', 'error');
       } finally {
         saveBtn.disabled = false;
@@ -264,7 +267,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       }
     });
 
-    // Delete product
     window.confirmDeleteProduct = function(id, name) {
       document.getElementById('delete-message').textContent = `Are you sure you want to delete "${name}"? This cannot be undone.`;
       pendingDeleteFn = async () => {

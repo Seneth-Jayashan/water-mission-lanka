@@ -1,38 +1,211 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout>
-  <main class="min-h-screen bg-[#f0f4f8] flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
-        <p class="text-slate-500 text-sm">Please sign in to the admin dashboard</p>
+<Layout title="Admin Login | Water Mission Lanka">
+  <main class="admin-login-page">
+    <section class="login-panel" aria-label="Admin login">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 3.25c3.2 3.44 5.25 6.24 5.25 9.04a5.25 5.25 0 0 1-10.5 0c0-2.8 2.05-5.6 5.25-9.04Z"/>
+          <path d="M9.35 13.1c.52 1.35 1.42 2.03 2.65 2.03"/>
+        </svg>
       </div>
-      <form id="login-form" class="space-y-5">
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Username</label>
-          <input id="username" name="username" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0081c9] focus:border-transparent transition-all" value="admin" />
+
+      <div class="login-heading">
+        <p>Water Mission Lanka</p>
+        <h1>Welcome Back</h1>
+        <span>Please sign in to manage the admin dashboard.</span>
+      </div>
+
+      <form id="login-form" class="login-form">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" autocomplete="username" value="admin" />
         </div>
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
-          <input id="password" name="password" type="password" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0081c9] focus:border-transparent transition-all" value="admin123" />
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" value="admin123" />
         </div>
-        <div class="pt-2">
-          <button id="submit" type="submit" class="w-full bg-[#0081c9] hover:bg-[#006ba6] text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md shadow-blue-100 flex justify-center items-center">
-            Sign In
-          </button>
-        </div>
-        <div id="message" role="status" class="text-sm text-center text-red-500 font-medium h-4"></div>
+
+        <button id="submit" type="submit" class="login-button">Sign In</button>
+        <div id="message" role="status" class="login-message"></div>
       </form>
-      <div class="mt-8 text-center">
-        <a href="/" class="text-sm text-slate-500 hover:text-[#0081c9] transition-colors flex items-center justify-center gap-2">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to Website
-        </a>
-      </div>
-    </div>
+
+      <a href="/" class="site-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to Website
+      </a>
+    </section>
   </main>
 </Layout>
+
+<style>
+  .admin-login-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: #0f172a;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(0, 129, 201, 0.14), transparent 30%),
+      linear-gradient(135deg, #eef7fb 0%, #f8fafc 46%, #e7f3f8 100%);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .login-panel {
+    width: min(100%, 430px);
+    padding: 34px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 24px 60px rgba(15, 73, 103, 0.16);
+  }
+
+  .brand-mark {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 20px;
+    border-radius: 8px;
+    color: #0081c9;
+    background: #e6f4fb;
+  }
+
+  .brand-mark svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .login-heading {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .login-heading p {
+    margin: 0 0 8px;
+    color: #0081c9;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .login-heading h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(28px, 6vw, 36px);
+    line-height: 1.1;
+    font-weight: 800;
+  }
+
+  .login-heading span {
+    display: block;
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .login-form {
+    display: grid;
+    gap: 18px;
+  }
+
+  .field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .field input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #0f172a;
+    background: #ffffff;
+    font: inherit;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .field input:focus {
+    border-color: #0081c9;
+    box-shadow: 0 0 0 4px rgba(0, 129, 201, 0.14);
+  }
+
+  .login-button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 4px;
+    border: 0;
+    border-radius: 8px;
+    color: #ffffff;
+    background: #0081c9;
+    box-shadow: 0 12px 22px rgba(0, 129, 201, 0.22);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .login-button:hover {
+    background: #006ba6;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 26px rgba(0, 129, 201, 0.26);
+  }
+
+  .login-message {
+    min-height: 20px;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .site-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 22px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .site-link:hover {
+    color: #0081c9;
+  }
+
+  .site-link svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+  }
+
+  @media (max-width: 480px) {
+    .admin-login-page {
+      padding: 16px;
+    }
+
+    .login-panel {
+      padding: 26px 20px;
+    }
+  }
+</style>
 
 <script type="module">
 const form = document.getElementById('login-form');
