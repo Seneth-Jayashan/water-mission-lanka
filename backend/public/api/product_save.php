@@ -62,6 +62,7 @@ $desc = trim($_POST['description'] ?? '');
 $priceInput = trim((string)($_POST['price'] ?? '0'));
 $catIds = isset($_POST['category_ids']) ? array_map('intval', (array)$_POST['category_ids']) : [];
 $removeImageIds = isset($_POST['remove_image_ids']) ? array_map('intval', (array)$_POST['remove_image_ids']) : [];
+$removeFilenames = isset($_POST['remove_filenames']) ? (array)$_POST['remove_filenames'] : [];
 $editId = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 
 // Validation
@@ -78,22 +79,50 @@ $newImages = [];
 
 // Process uploaded images
 if (!empty($_FILES['images']) && is_array($_FILES['images']['name'])) {
+    // count incoming files (exclude NO_FILE entries)
+    $incomingCount = 0;
     $fileCount = count($_FILES['images']['name']);
     for ($i = 0; $i < $fileCount; $i++) {
-        if ($_FILES['images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
+        if (isset($_FILES['images']['error'][$i]) && $_FILES['images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
             continue;
         }
+        $incomingCount++;
+    }
 
-        $single = [
-            'name'     => $_FILES['images']['name'][$i],
-            'type'     => $_FILES['images']['type'][$i],
-            'tmp_name' => $_FILES['images']['tmp_name'][$i],
-            'error'    => $_FILES['images']['error'][$i],
-            'size'     => $_FILES['images']['size'][$i],
-        ];
-        $saved = validateAndSaveProductImage($single, $uploadsDir, $errors);
-        if ($saved) {
-            $newImages[] = $saved;
+    // determine existing images for edit mode
+    $existingCount = 0;
+    if ($editId > 0) {
+        $stmtCount = $pdo->prepare('SELECT COUNT(*) FROM product_images WHERE product_id = ?');
+        $stmtCount->execute([$editId]);
+        $existingCount = (int)$stmtCount->fetchColumn();
+    }
+
+    // calculate removals supplied by client (ids + filenames)
+    $removalsCount = 0;
+    if (!empty($removeImageIds)) $removalsCount += count($removeImageIds);
+    if (!empty($removeFilenames)) $removalsCount += count($removeFilenames);
+
+    $projectedExisting = max(0, $existingCount - $removalsCount);
+
+    if ($projectedExisting + $incomingCount > 6) {
+        $errors[] = 'You can upload up to 6 images per product (existing + new).';
+    } else {
+        for ($i = 0; $i < $fileCount; $i++) {
+            if ($_FILES['images']['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            $single = [
+                'name'     => $_FILES['images']['name'][$i],
+                'type'     => $_FILES['images']['type'][$i],
+                'tmp_name' => $_FILES['images']['tmp_name'][$i],
+                'error'    => $_FILES['images']['error'][$i],
+                'size'     => $_FILES['images']['size'][$i],
+            ];
+            $saved = validateAndSaveProductImage($single, $uploadsDir, $errors);
+            if ($saved) {
+                $newImages[] = $saved;
+            }
         }
     }
 }
@@ -134,6 +163,20 @@ if (!empty($removeImageIds)) {
         if ($rmRow) {
             @unlink($uploadsDir . '/' . $rmRow['filename']);
             $delRm->execute([$productId, $rmId]);
+        }
+    }
+}
+
+// remove by filename (sent by frontend when product list doesn't include image ids)
+if (!empty($removeFilenames)) {
+    $selByName = $pdo->prepare('SELECT id, filename FROM product_images WHERE product_id = ? AND filename = ?');
+    $delByName = $pdo->prepare('DELETE FROM product_images WHERE product_id = ? AND filename = ?');
+    foreach ($removeFilenames as $fname) {
+        $selByName->execute([$productId, $fname]);
+        $row = $selByName->fetch();
+        if ($row) {
+            @unlink($uploadsDir . '/' . $row['filename']);
+            $delByName->execute([$productId, $fname]);
         }
     }
 }

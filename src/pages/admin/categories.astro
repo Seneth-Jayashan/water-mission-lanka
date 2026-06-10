@@ -10,82 +10,224 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         <p>Manage product groups, descriptions, photos, and product counts.</p>
       </div>
       <button class="btn btn-primary" id="add-category-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         Add Category
       </button>
     </div>
 
-    <div class="card">
+    <div class="card shadow-sm">
       <div class="table-wrap">
-        <table>
-          <thead><tr><th>Image</th><th>Name</th><th>Description</th><th>Products</th><th style="width:180px;">Actions</th></tr></thead>
-          <tbody id="categories-table-body"><tr><td colspan="5"><div class="empty-state">Loading categories...</div></td></tr></tbody>
+        <table class="table-modern">
+          <thead>
+            <tr>
+              <th style="width: 80px;">Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Products Count</th>
+              <th style="width:180px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="categories-table-body">
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <span class="spinner loading-spinner"></span>
+                  <p>Loading categories...</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="category-modal">
-    <div class="modal" style="max-width:520px;">
+    <div class="modal modal-md">
       <div class="modal-header">
         <h3 id="category-modal-title">Add Category</h3>
         <button class="btn-icon" onclick="closeModal('category-modal')" aria-label="Close category modal">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
       <div class="modal-body">
         <form id="category-form" enctype="multipart/form-data">
           <input type="hidden" id="cf-id" />
+          
           <div class="form-group">
-            <label for="cf-name">Category Name *</label>
-            <input type="text" class="form-control" id="cf-name" required />
+            <label for="cf-name">Category Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="cf-name" placeholder="e.g., Electronics, Apparel" required />
           </div>
+          
           <div class="form-group">
             <label for="cf-description">Description</label>
-            <textarea class="form-control" id="cf-description" rows="3" style="min-height:80px;"></textarea>
+            <textarea class="form-control" id="cf-description" rows="3" placeholder="Provide a brief overview of this group..."></textarea>
           </div>
-          <div class="form-group" id="cf-existing-image-group" style="display:none;">
-            <label>Current Image</label>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <img id="cf-existing-image" src="" alt="" style="width:80px;height:80px;border-radius:8px;object-fit:cover;border:1px solid var(--border);" />
-              <span style="font-size:12px;color:var(--text-dim);">Upload a new image below to replace it.</span>
-            </div>
-          </div>
+
+          <div class="form-divider"></div>
+          
           <div class="form-group">
-            <label for="cf-image">Category Photo</label>
-            <input type="file" class="form-control" id="cf-image" accept="image/jpeg,image/png,image/webp" />
-            <div class="form-hint">Max 2MB. JPG, PNG, or WEBP.</div>
+            <label>Category Photo</label>
+            <p class="form-hint text-sm text-muted mb-3">Click below to upload a banner or icon for this category. Max 2MB (JPG, PNG, WEBP).</p>
+            
+            <div class="category-upload-zone" id="category-upload-zone">
+              <input type="file" id="cf-image" accept="image/jpeg,image/png,image/webp" class="hidden-file-input" />
+              
+              <div class="upload-placeholder" id="cf-upload-placeholder">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Click to upload image</span>
+              </div>
+
+              <div class="upload-preview-wrapper" id="cf-preview-wrapper" style="display: none;">
+                <img id="cf-image-preview" src="" alt="Preview" />
+                <button type="button" class="btn-remove-preview" id="cf-remove-image" title="Remove image">&times;</button>
+              </div>
+            </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('category-modal')">Cancel</button>
-        <button class="btn btn-primary" id="category-save-btn">Save Category</button>
+        <button class="btn btn-primary" id="category-save-btn">
+          <span id="category-save-text">Save Category</span>
+          <span class="spinner" id="category-save-spinner" style="display:none;"></span>
+        </button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="delete-modal">
-    <div class="modal" style="max-width:400px;">
+    <div class="modal modal-sm">
       <div class="modal-header">
-        <h3>Confirm Delete</h3>
+        <h3 class="text-danger flex items-center gap-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Confirm Deletion
+        </h3>
         <button class="btn-icon" onclick="closeModal('delete-modal')" aria-label="Close delete modal">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <p id="delete-message" style="color:var(--text-muted);font-size:14px;">Are you sure you want to delete this item?</p>
+        <p id="delete-message" class="text-muted">Are you sure you want to delete this item? This action cannot be undone.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
-        <button class="btn btn-danger" id="delete-confirm-btn">Delete</button>
+        <button class="btn btn-danger" id="delete-confirm-btn">Delete Category</button>
       </div>
     </div>
   </div>
 
+  <style>
+    /* --- Scoped UI Enhancements --- */
+    
+    /* Table Styling */
+    .table-modern th { background: #f8fafc; font-weight: 600; color: #475569; padding: 12px 16px; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    .table-modern td { padding: 14px 16px; vertical-align: middle; border-bottom: 1px solid #e2e8f0; }
+    .thumb { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; background-color: #f8fafc; }
+    .thumb-empty { background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #94a3b8; font-weight: 600; }
+    
+    /* Forms & Architecture */
+    .form-control { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; transition: border-color 0.2s, box-shadow 0.2s; font-size: 0.95rem; }
+    .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    .form-divider { height: 1px; background: #e2e8f0; margin: 1.5rem 0; }
+    
+    /* Interactive Image Drop Zone */
+    .category-upload-zone { border: 2px dashed #cbd5e1; border-radius: 8px; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: pointer; transition: all 0.2s ease; background: #f8fafc; overflow: hidden; }
+    .category-upload-zone:hover { border-color: #3b82f6; background: #eff6ff; color: #3b82f6; }
+    .hidden-file-input { display: none; }
+    
+    .upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; color: #64748b; font-size: 0.9rem; }
+    .category-upload-zone:hover .upload-placeholder { color: #3b82f6; }
+    
+    .upload-preview-wrapper { width: 100%; height: 160px; position: relative; display: flex; align-items: center; justify-content: center; background: #0f172a; }
+    .upload-preview-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+    
+    .btn-remove-preview { position: absolute; top: 8px; right: 8px; background: rgba(15, 23, 42, 0.75); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; backdrop-filter: blur(2px); }
+    .btn-remove-preview:hover { background: #ef4444; }
+    
+    /* Global Helpers */
+    .modal-md { max-width: 520px; width: 100%; }
+    .modal-sm { max-width: 400px; width: 100%; }
+    .text-danger { color: #ef4444; }
+    .text-muted { color: #64748b; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .empty-icon { color: #cbd5e1; margin-bottom: 0.25rem; }
+  </style>
+
   <script type="module">
     let allCategories = [];
     let pendingDeleteFn = null;
+    let imageRemovedOrChanged = false; // Flag to trace photo updates
+
+    // Connect image upload zone presentation logic
+    function initImageUploadZone() {
+      const zone = document.getElementById('category-upload-zone');
+      const fileInput = document.getElementById('cf-image');
+      const placeholder = document.getElementById('cf-upload-placeholder');
+      const previewWrapper = document.getElementById('cf-preview-wrapper');
+      const previewImg = document.getElementById('cf-image-preview');
+      const removeBtn = document.getElementById('cf-remove-image');
+
+      zone.addEventListener('click', (e) => {
+        if (e.target !== removeBtn) fileInput.click();
+      });
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            placeholder.style.display = 'none';
+            previewWrapper.style.display = 'flex';
+            zone.style.borderStyle = 'solid';
+            zone.style.borderColor = '#e2e8f0';
+            imageRemovedOrChanged = true;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.value = '';
+        previewImg.src = '';
+        previewWrapper.style.display = 'none';
+        placeholder.style.display = 'flex';
+        zone.style.borderStyle = 'dashed';
+        zone.style.borderColor = '#cbd5e1';
+        imageRemovedOrChanged = true;
+      });
+    }
+
+    // Set preview explicitly for editing configuration
+    function setUploadZoneImage(url) {
+      const zone = document.getElementById('category-upload-zone');
+      const placeholder = document.getElementById('cf-upload-placeholder');
+      const previewWrapper = document.getElementById('cf-preview-wrapper');
+      const previewImg = document.getElementById('cf-image-preview');
+      
+      if (url) {
+        previewImg.src = url;
+        placeholder.style.display = 'none';
+        previewWrapper.style.display = 'flex';
+        zone.style.borderStyle = 'solid';
+        zone.style.borderColor = '#e2e8f0';
+      } else {
+        resetUploadZone();
+      }
+    }
+
+    function resetUploadZone() {
+      const zone = document.getElementById('category-upload-zone');
+      document.getElementById('cf-image').value = '';
+      document.getElementById('cf-image-preview').src = '';
+      document.getElementById('cf-preview-wrapper').style.display = 'none';
+      document.getElementById('cf-upload-placeholder').style.display = 'flex';
+      zone.style.borderStyle = 'dashed';
+      zone.style.borderColor = '#cbd5e1';
+      imageRemovedOrChanged = false;
+    }
 
     async function loadCategories() {
       try {
@@ -94,31 +236,49 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         allCategories = data.categories || [];
         renderCategories(allCategories);
       } catch {
-        document.getElementById('categories-table-body').innerHTML = '<tr><td colspan="5"><div class="empty-state" style="color:var(--danger);">Failed to load categories</div></td></tr>';
+        document.getElementById('categories-table-body').innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state text-danger">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon text-danger"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <p>Failed to load categories. Please verify your connection.</p>
+              </div>
+            </td>
+          </tr>`;
       }
     }
 
     function renderCategories(cats) {
       const tbody = document.getElementById('categories-table-body');
       if (!cats.length) {
-        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><strong>No categories yet</strong>Add categories to organize products.</div></td></tr>';
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                <strong>No categories found</strong>
+                <p class="text-sm">Create standard category definitions to group your storefront offerings.</p>
+              </div>
+            </td>
+          </tr>`;
         return;
       }
 
       tbody.innerHTML = cats.map(c => {
         const thumb = c.image
-          ? `<img src="${window.esc(c.image)}" alt="${window.esc(c.name)}" class="thumb" />`
+          ? `<img src="${window.esc(c.image)}" alt="${window.esc(c.name)}" class="thumb shadow-sm" />`
           : '<div class="thumb thumb-empty">N/A</div>';
         const desc = c.description
           ? window.esc(c.description).substring(0, 80) + (c.description.length > 80 ? '...' : '')
-          : '<span class="row-muted">--</span>';
+          : '<span class="text-muted text-sm">--</span>';
+          
         return `<tr>
           <td>${thumb}</td>
-          <td><span class="row-title">${window.esc(c.name)}</span></td>
-          <td style="font-size:13px;color:var(--text-muted);max-width:320px;">${desc}</td>
-          <td><span class="badge badge-blue">${c.product_count || 0}</span></td>
+          <td><strong class="row-title">${window.esc(c.name)}</strong></td>
+          <td class="text-muted" style="font-size:13px; max-width:320px;">${desc}</td>
+          <td><span class="badge badge-blue flex items-center gap-1 w-max"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${c.product_count || 0} Products</span></td>
           <td>
-            <div class="action-group">
+            <div class="action-group flex gap-2">
               <button class="btn btn-ghost btn-sm" onclick="editCategory(${c.id})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Edit
@@ -138,8 +298,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       document.getElementById('cf-id').value = '';
       document.getElementById('cf-name').value = '';
       document.getElementById('cf-description').value = '';
-      document.getElementById('cf-image').value = '';
-      document.getElementById('cf-existing-image-group').style.display = 'none';
+      resetUploadZone();
       window.openModal('category-modal');
     });
 
@@ -150,22 +309,26 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       document.getElementById('cf-id').value = c.id;
       document.getElementById('cf-name').value = c.name || '';
       document.getElementById('cf-description').value = c.description || '';
-      document.getElementById('cf-image').value = '';
-
-      const imgGroup = document.getElementById('cf-existing-image-group');
+      
+      resetUploadZone();
       if (c.image) {
-        document.getElementById('cf-existing-image').src = c.image;
-        imgGroup.style.display = 'block';
-      } else {
-        imgGroup.style.display = 'none';
+        setUploadZoneImage(c.image);
       }
       window.openModal('category-modal');
     };
 
     document.getElementById('category-save-btn').addEventListener('click', async () => {
+      const saveBtn = document.getElementById('category-save-btn');
+      const saveText = document.getElementById('category-save-text');
+      const saveSpinner = document.getElementById('category-save-spinner');
+
       const id = document.getElementById('cf-id').value;
       const name = document.getElementById('cf-name').value.trim();
       if (!name) { window.showToast('Category name is required', 'error'); return; }
+
+      saveBtn.disabled = true;
+      saveText.style.display = 'none';
+      saveSpinner.style.display = 'inline-block';
 
       const formData = new FormData();
       formData.append('action', id ? 'update' : 'create');
@@ -176,6 +339,9 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       const fileInput = document.getElementById('cf-image');
       if (fileInput.files.length) {
         formData.append('image', fileInput.files[0]);
+      } else if (imageRemovedOrChanged && !document.getElementById('cf-image-preview').src) {
+        // Explicitly notify server if existing banner photo was explicitly detached
+        formData.append('remove_image', '1');
       }
 
       try {
@@ -192,11 +358,17 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         } else {
           window.showToast(data.error || 'Save failed', 'error');
         }
-      } catch { window.showToast('Network error', 'error'); }
+      } catch { 
+        window.showToast('Network framework context mismatch error', 'error'); 
+      } finally {
+        saveBtn.disabled = false;
+        saveText.style.display = 'inline';
+        saveSpinner.style.display = 'none';
+      }
     });
 
     window.confirmDeleteCategory = function(id, name) {
-      document.getElementById('delete-message').textContent = `Delete category "${name}"? Products in this category will not be deleted.`;
+      document.getElementById('delete-message').innerHTML = `Are you sure you want to delete category <strong>"${name}"</strong>?<br><span class="text-sm text-muted">Note: Dynamic items cataloged inside this group will not be affected.</span>`;
       pendingDeleteFn = async () => {
         try {
           const res = await fetch(`${window.API}/category_save.php`, {
@@ -207,12 +379,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
           });
           const data = await res.json();
           if (data.success) {
-            window.showToast('Category deleted');
+            window.showToast('Category successfully deleted');
             loadCategories();
           } else {
-            window.showToast(data.error || 'Delete failed', 'error');
+            window.showToast(data.error || 'Delete handling failed', 'error');
           }
-        } catch { window.showToast('Network error', 'error'); }
+        } catch { window.showToast('Network connection failure', 'error'); }
         window.closeModal('delete-modal');
       };
       window.openModal('delete-modal');
@@ -222,7 +394,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
       if (pendingDeleteFn) pendingDeleteFn();
     });
 
-    window.setActiveNav('categories');
+    initImageUploadZone();
+    if(typeof window.setActiveNav === 'function') window.setActiveNav('categories');
     loadCategories();
   </script>
 </AdminLayout>
