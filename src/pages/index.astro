@@ -12,10 +12,7 @@ import missionBg from '../assets/mission-Bg.png';
 import martinImg from '../assets/martin.jpg';
 import bryanImg from '../assets/bryan.jpg';
 import janeImg from '../assets/jane.jpg';
-import domesticImg from '../assets/domestic_filter.png';
-import commercialImg from '../assets/commercial_filter.png';
-import industrialImg from '../assets/industrial_filter.png';
-import wasteTreatmentImg from '../assets/water_waste_treatment.png';
+
 
 // Navbar Logic
 const pathname = new URL(Astro.url).pathname;
@@ -52,12 +49,7 @@ const stats = [
   }
 ];
 
-const categories = [
-  { name: "Domestic", image: domesticImg },
-  { name: "Commercial", image: commercialImg },
-  { name: "Industrial", image: industrialImg },
-  { name: "Water waste Treatment", image: wasteTreatmentImg },
-];
+
 
 const testimonials = [
   { name: "Martin Foster", role: "Homeowner", image: martinImg, text: "The water quality in our home has improved dramatically since installing the RO system." },
@@ -214,15 +206,8 @@ const testimonials = [
       <section class="bg-[#f0f4f8] py-16 md:py-24 px-6">
         <div class="max-w-7xl mx-auto text-center">
           <h2 class="text-3xl md:text-5xl font-bold text-[#004a7c] mb-12">Our Water Treatment Categories</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {categories.map((cat) => (
-              <div class="bg-white rounded-[2rem] shadow-xl p-6 md:p-8 flex flex-col items-center hover:scale-105 transition duration-300">
-                <div class="min-h-[150px] md:min-h-[200px] flex items-center justify-center mb-6">
-                  <Image src={cat.image} alt={cat.name} class="max-h-[140px] md:max-h-[180px] w-auto object-contain" />
-                </div>
-                <p class="text-lg md:text-xl font-bold text-slate-800">{cat.name}</p>
-              </div>
-            ))}
+          <div id="home-categories-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <!-- Dynamic categories loaded via JS -->
           </div>
         </div>
       </section>
@@ -339,6 +324,64 @@ const testimonials = [
         }
       }
 
+      async function loadHomeCategories() {
+        const grid = document.getElementById('home-categories-grid') as HTMLDivElement | null;
+        if (!grid) return;
+        const e = (s: string | number | null | undefined) => String(s || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+
+        grid.innerHTML = Array.from({length: 4}, () => `
+          <div class="bg-white rounded-[2rem] shadow-xl p-6 md:p-8 flex flex-col items-center animate-pulse">
+            <div class="min-h-[150px] md:min-h-[200px] w-full flex items-center justify-center mb-6">
+              <div class="w-32 h-32 bg-gray-200 rounded-xl"></div>
+            </div>
+            <div class="h-5 bg-gray-200 rounded w-24"></div>
+          </div>
+        `).join('');
+
+        try {
+          const res = await fetch(`${API_BASE}/categories.php`);
+          if (!res.ok) throw new Error('Request failed');
+          type HomeCategory = { id: number; name?: string | null; description?: string | null; image?: string | null; };
+          const data: { categories?: HomeCategory[] } = await res.json();
+          const categories = data.categories || [];
+          if (!categories.length) {
+            grid.innerHTML = '<div class="col-span-full text-slate-500">No categories available yet.</div>';
+            return;
+          }
+          // Adjust grid columns based on count
+          if (categories.length <= 3) {
+            grid.className = grid.className.replace('md:grid-cols-4', `md:grid-cols-${categories.length}`);
+          }
+          grid.innerHTML = categories.map((cat: HomeCategory) => {
+            const img = cat.image
+              ? `<img src="${e(cat.image)}" alt="${e(cat.name)}" class="max-h-[140px] md:max-h-[180px] w-auto object-contain" loading="lazy" />`
+              : `<div class="w-24 h-24 rounded-full bg-[#d6eaf8] flex items-center justify-center">
+                  <svg class="w-12 h-12 text-[#0081c9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16.36C7 10.33 12 5.26 12 5.26s5 5.07 5 11.1c0 2.76-2.24 5-5 5s-5-2.24-5-5z" /></svg>
+                </div>`;
+            const desc = cat.description
+              ? `<p class="text-sm text-slate-500 mt-2 line-clamp-2">${e(cat.description)}</p>`
+              : '';
+            return `
+              <div class="bg-white rounded-[2rem] shadow-xl p-6 md:p-8 flex flex-col items-center hover:scale-105 transition duration-300">
+                <div class="min-h-[150px] md:min-h-[200px] flex items-center justify-center mb-6">
+                  ${img}
+                </div>
+                <p class="text-lg md:text-xl font-bold text-slate-800">${e(cat.name || 'Category')}</p>
+                ${desc}
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          grid.innerHTML = '<div class="col-span-full text-red-600">Unable to load categories right now.</div>';
+        }
+      }
+
+
       function initCounters() {
         const counters = document.querySelectorAll('.counter-value');
         const observer = new IntersectionObserver((entries) => {
@@ -367,9 +410,11 @@ const testimonials = [
         counters.forEach(counter => observer.observe(counter));
       }
       loadHomeProducts();
+      loadHomeCategories();
       initCounters();
       document.addEventListener('astro:page-load', initCounters);
       document.addEventListener('astro:page-load', loadHomeProducts);
+      document.addEventListener('astro:page-load', loadHomeCategories);
     </script>
 </body>
 </html>

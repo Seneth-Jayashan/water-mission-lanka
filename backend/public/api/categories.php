@@ -10,7 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$stmt = $pdo->query('SELECT c.id, c.name, COUNT(pc.product_id) AS product_count
+$baseImagePath = '/backend/assets/uploads/';
+
+$stmt = $pdo->query('SELECT c.id, c.name, c.description, c.image, COUNT(pc.product_id) AS product_count
   FROM categories c
   LEFT JOIN product_categories pc ON pc.category_id = c.id
   GROUP BY c.id
@@ -21,6 +23,8 @@ foreach ($stmt->fetchAll() as $row) {
     $categories[] = [
         'id' => (int)$row['id'],
         'name' => $row['name'],
+        'description' => $row['description'],
+        'image' => !empty($row['image']) ? $baseImagePath . $row['image'] : null,
         'product_count' => (int)$row['product_count'],
     ];
 }

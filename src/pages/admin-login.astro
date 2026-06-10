@@ -56,8 +56,8 @@ form.addEventListener('submit', async (e) => {
 
     if (res.ok && payload && payload.success) {
       msg.textContent = 'Login successful — opening admin panel...';
-      // open admin panel (loads backend session-protected UI)
-      window.location.href = 'http://localhost:8000/public/index.php';
+      // redirect to frontend admin dashboard (stays on Astro, not the PHP backend)
+      window.location.href = '/admin';
     } else {
       msg.textContent = payload?.error || 'Login failed';
     }
