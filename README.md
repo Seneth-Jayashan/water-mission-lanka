@@ -73,4 +73,24 @@ mysql -u root -p water_mission < backend/init.sql
 1. Select the `water_mission` database.
 2. Go to the **SQL** or **Query** tab.
 3. Copy the entire contents of `backend/init.sql` and execute it.
+
+## 🔄 Database Migrations
+
+If you need to run schema updates (such as `backend/migrate_categories.sql` to add description and image columns to categories):
+
+### Using XAMPP and VS Code Terminal
+
+Open the VS Code Terminal (ensure your XAMPP MySQL server is running) and execute the command corresponding to your shell type:
+
+**PowerShell (default in VS Code on Windows):**
+```powershell
+& "C:\xampp\mysql\bin\mysql.exe" -u root water_mission < backend/migrate_categories.sql
+```
+
+**Git Bash / Command Prompt:**
+```sh
+C:\xampp\mysql\bin\mysql.exe -u root water_mission < backend/migrate_categories.sql
+```
+
+*(Note: If your XAMPP MySQL root user has a password, append `-p` to the end of the command and enter the password when prompted).*
 ```
