@@ -101,6 +101,12 @@ import Footer from '../components/footer.astro';
       transform: scale(1.1);
       background: #005e91;
     }
+    
+    /* Custom Scrollbar for dropdowns */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
 <body class="bg-slate-50 m-0 flex flex-col min-h-screen overflow-x-hidden">
@@ -152,32 +158,44 @@ import Footer from '../components/footer.astro';
         <!-- Controls Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
           
-          <!-- Category -->
-          <div class="lg:col-span-3 relative group flex items-center bg-white border border-slate-200 rounded-xl hover:border-[#0076b6] transition-colors shadow-sm focus-within:border-[#0076b6] focus-within:ring-2 focus-within:ring-[#0076b6]/20 h-[56px]">
-            <div class="pl-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-            </div>
-            <select id="category_id" name="category_id" class="appearance-none bg-transparent outline-none text-slate-700 font-semibold py-3 pl-3 pr-10 cursor-pointer w-full h-full">
-              <option value="">All Categories</option>
-            </select>
-            <div class="absolute right-4 pointer-events-none text-slate-400 group-hover:text-[#0076b6] transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+          <!-- Category Custom Dropdown -->
+          <div class="lg:col-span-3 relative group" id="dropdown-category">
+            <input type="hidden" id="category_id" name="category_id" value="">
+            <button type="button" class="w-full flex items-center bg-white border border-slate-200 rounded-xl hover:border-[#0076b6] transition-colors shadow-sm focus:border-[#0076b6] focus:ring-2 focus:ring-[#0076b6]/20 h-[56px] text-left outline-none cursor-pointer">
+              <div class="pl-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+              </div>
+              <span id="category-text" class="flex-1 px-3 text-slate-700 font-semibold truncate pointer-events-none">All Categories</span>
+              <div class="pr-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
+                <svg id="category-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </button>
+            <div id="category-menu" class="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] opacity-0 invisible transition-all duration-200 translate-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+              <ul class="py-2" id="category-options-list">
+                <li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="">All Categories</li>
+              </ul>
             </div>
           </div>
 
-          <!-- Sort -->
-          <div class="lg:col-span-3 relative group flex items-center bg-white border border-slate-200 rounded-xl hover:border-[#0076b6] transition-colors shadow-sm focus-within:border-[#0076b6] focus-within:ring-2 focus-within:ring-[#0076b6]/20 h-[56px]">
-            <div class="pl-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
-            </div>
-            <select id="sort" name="sort" class="appearance-none bg-transparent outline-none text-slate-700 font-semibold py-3 pl-3 pr-10 cursor-pointer w-full h-full">
-              <option value="newest">Newest First</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="name_asc">Name: A to Z</option>
-            </select>
-            <div class="absolute right-4 pointer-events-none text-slate-400 group-hover:text-[#0076b6] transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+          <!-- Sort Custom Dropdown -->
+          <div class="lg:col-span-3 relative group" id="dropdown-sort">
+            <input type="hidden" id="sort" name="sort" value="newest">
+            <button type="button" class="w-full flex items-center bg-white border border-slate-200 rounded-xl hover:border-[#0076b6] transition-colors shadow-sm focus:border-[#0076b6] focus:ring-2 focus:ring-[#0076b6]/20 h-[56px] text-left outline-none cursor-pointer">
+              <div class="pl-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+              </div>
+              <span id="sort-text" class="flex-1 px-3 text-slate-700 font-semibold truncate pointer-events-none">Newest First</span>
+              <div class="pr-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
+                <svg id="sort-chevron" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+              </div>
+            </button>
+            <div id="sort-menu" class="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] opacity-0 invisible transition-all duration-200 translate-y-2">
+              <ul class="py-2" id="sort-options-list">
+                <li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="newest">Newest First</li>
+                <li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="price_asc">Price: Low to High</li>
+                <li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="price_desc">Price: High to Low</li>
+                <li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="name_asc">Name: A to Z</li>
+              </ul>
             </div>
           </div>
 
@@ -270,8 +288,8 @@ import Footer from '../components/footer.astro';
     const searchIcon     = document.getElementById('search-icon')     as HTMLElement;
     const searchSpinner  = document.getElementById('search-spinner')  as HTMLElement;
     const searchWrapper  = document.getElementById('search-wrapper')  as HTMLElement;
-    const categorySelect = document.getElementById('category_id')     as HTMLSelectElement;
-    const sortSelect     = document.getElementById('sort')            as HTMLSelectElement;
+    const categorySelect = document.getElementById('category_id')     as HTMLInputElement;
+    const sortSelect     = document.getElementById('sort')            as HTMLInputElement;
     
     // Price Slider Elements
     const minPriceInput  = document.getElementById('min_price')       as HTMLInputElement;
@@ -404,10 +422,10 @@ import Footer from '../components/footer.astro';
       if (!btn) return;
       const field = btn.dataset.clear!;
       if (field === 'q')           { searchInput.value = ''; updateClearButton(); }
-      if (field === 'category_id') categorySelect.value = '';
+      if (field === 'category_id') { categorySelect.value = ''; document.getElementById('category-text').textContent = 'All Categories'; }
       if (field === 'min_price')   { minPriceInput.value = ''; syncInputsToSliders(); }
       if (field === 'max_price')   { maxPriceInput.value = ''; syncInputsToSliders(); }
-      if (field === 'sort')        sortSelect.value = 'newest';
+      if (field === 'sort')        { sortSelect.value = 'newest'; document.getElementById('sort-text').textContent = 'Newest First'; }
       currentPage = 1;
       loadProducts();
     });
@@ -487,12 +505,12 @@ import Footer from '../components/footer.astro';
         const res = await fetch(`${API_BASE}/categories.php`);
         if (!res.ok) return;
         const data: { categories?: CategorySummary[] } = await res.json();
-        const opts = ['<option value="">All Categories</option>'];
+        const listItems = ['<li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="">All Categories</li>'];
         for (const c of (data.categories || [])) {
           categoryMap[String(c.id)] = c.name;
-          opts.push(`<option value="${encodeHtml(String(c.id))}">${encodeHtml(c.name)} (${c.product_count})</option>`);
+          listItems.push(`<li class="px-4 py-2.5 text-slate-700 font-medium hover:bg-slate-50 hover:text-[#0076b6] cursor-pointer transition-colors" data-value="${encodeHtml(String(c.id))}">${encodeHtml(c.name)} (${c.product_count})</li>`);
         }
-        categorySelect.innerHTML = opts.join('');
+        document.getElementById('category-options-list').innerHTML = listItems.join('');
       } catch {}
     }
 
@@ -577,9 +595,11 @@ import Footer from '../components/footer.astro';
     resetBtn.addEventListener('click', () => {
       searchInput.value    = '';
       categorySelect.value = '';
+      document.getElementById('category-text').textContent = 'All Categories';
       minPriceInput.value  = '';
       maxPriceInput.value  = '';
       sortSelect.value     = 'newest';
+      document.getElementById('sort-text').textContent = 'Newest First';
       
       minSlider.value = '0';
       maxSlider.value = MAX_SLIDER_VAL.toString();
@@ -590,6 +610,66 @@ import Footer from '../components/footer.astro';
       currentPage = 1;
       loadProducts();
     });
+
+    /* ───── Custom Dropdown Init ───── */
+    function setupCustomDropdown(dropdownId, inputId, textId, chevronId, optionsContainerId) {
+      const dropdown = document.getElementById(dropdownId);
+      const input = document.getElementById(inputId) as HTMLInputElement;
+      const text = document.getElementById(textId);
+      const chevron = document.getElementById(chevronId);
+      const optionsContainer = document.getElementById(optionsContainerId);
+      const btn = dropdown.querySelector('button');
+
+      let isOpen = false;
+
+      function close() {
+        isOpen = false;
+        optionsContainer.classList.remove('opacity-100', 'visible', 'translate-y-0');
+        optionsContainer.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        chevron.classList.remove('rotate-180');
+      }
+
+      function open() {
+        document.querySelectorAll('.custom-dropdown-open').forEach(d => {
+          if (d !== dropdown) {
+            d.dispatchEvent(new CustomEvent('closeDropdown'));
+          }
+        });
+        isOpen = true;
+        optionsContainer.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+        optionsContainer.classList.add('opacity-100', 'visible', 'translate-y-0');
+        chevron.classList.add('rotate-180');
+        dropdown.classList.add('custom-dropdown-open');
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isOpen ? close() : open();
+      });
+
+      dropdown.addEventListener('closeDropdown', close);
+
+      optionsContainer.addEventListener('click', (e) => {
+        const li = (e.target as HTMLElement).closest('li');
+        if (li) {
+          const val = li.getAttribute('data-value');
+          const textContent = li.textContent.trim();
+          input.value = val;
+          text.textContent = textContent;
+          close();
+          input.dispatchEvent(new Event('change'));
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target as Node)) {
+          close();
+        }
+      });
+    }
+
+    setupCustomDropdown('dropdown-category', 'category_id', 'category-text', 'category-chevron', 'category-menu');
+    setupCustomDropdown('dropdown-sort', 'sort', 'sort-text', 'sort-chevron', 'sort-menu');
 
     // Pagination
     prevPageBtn.addEventListener('click', () => {
