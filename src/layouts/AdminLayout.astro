@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import logoImage from '../assets/logo.png';
 
 interface Props {
   title?: string;
@@ -247,7 +248,7 @@ const { pageTitle = 'Dashboard' } = Astro.props;
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <img src={logoImage.src} alt="Water Mission Lanka Logo" style="width: 32px; height: 32px; object-fit: contain;" />
         <span style="color:var(--text);font-size:18px;">WM <span style="color:var(--primary);">Admin</span></span>
       </div>
       <nav class="sidebar-nav">
@@ -269,7 +270,7 @@ const { pageTitle = 'Dashboard' } = Astro.props;
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Export CSV
         </a>
-        <a href="http://localhost:8000/public/products_import.php" class="sidebar-link" target="_blank">
+        <a href="#" class="sidebar-link" onclick="openModal('csv-import-modal'); return false;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
           Import CSV
         </a>
@@ -301,6 +302,35 @@ const { pageTitle = 'Dashboard' } = Astro.props;
 
       <div class="content">
         <slot />
+      </div>
+    </div>
+  </div>
+
+  <!-- CSV Import Modal -->
+  <div class="modal-overlay" id="csv-import-modal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Import Products</h3>
+        <button class="btn-icon" onclick="closeModal('csv-import-modal')" aria-label="Close import modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">Upload a CSV file to import or update products. The header must be exactly:</p>
+        <code style="font-size: 12px; display: block; padding: 8px; background: var(--bg); border-radius: 4px; margin-bottom: 16px;">Product ID,Product Name,Product Description,Price (LKR),Categories,Images</code>
+        <form id="csv-import-form" enctype="multipart/form-data">
+          <div class="form-group mb-0">
+            <label>CSV File</label>
+            <input type="file" id="csv-file-input" accept=".csv,text/csv" class="form-control" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('csv-import-modal')">Cancel</button>
+        <button class="btn btn-primary" id="csv-import-btn">
+          <span id="csv-import-text">Import</span>
+          <span class="spinner" id="csv-import-spinner" style="display:none;"></span>
+        </button>
       </div>
     </div>
   </div>
@@ -405,6 +435,58 @@ const { pageTitle = 'Dashboard' } = Astro.props;
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     window.esc = esc;
+
+    // ========================================
+    // CSV Import handling
+    // ========================================
+    const csvImportBtn = document.getElementById('csv-import-btn');
+    if (csvImportBtn) {
+      csvImportBtn.addEventListener('click', async function() {
+        const fileInput = document.getElementById('csv-file-input');
+        if (!fileInput.files || !fileInput.files[0]) {
+          showToast('Please select a CSV file', 'error');
+          return;
+        }
+
+        const btnText = document.getElementById('csv-import-text');
+        const btnSpinner = document.getElementById('csv-import-spinner');
+        
+        csvImportBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnSpinner.style.display = 'inline-block';
+
+        const formData = new FormData();
+        formData.append('csv_file', fileInput.files[0]);
+
+        try {
+          const res = await fetch(window.API + '/import_csv.php', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast(data.message, 'success');
+            closeModal('csv-import-modal');
+            fileInput.value = '';
+            // Reload products if on products page
+            if (typeof loadProducts === 'function') {
+              loadProducts();
+            } else {
+              setTimeout(() => { window.location.href = '/admin/products/'; }, 1000);
+            }
+          } else {
+            showToast(data.error || 'Import failed', 'error');
+          }
+        } catch (e) {
+          showToast('Network error during import', 'error');
+        } finally {
+          csvImportBtn.disabled = false;
+          btnText.style.display = 'inline';
+          btnSpinner.style.display = 'none';
+        }
+      });
+    }
   </script>
 </body>
 </html>

@@ -10,71 +10,244 @@ import Footer from '../components/footer.astro';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Products | Water Mission</title>
+  <style>
+    /* Spinning indicator for live search */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.7s linear infinite; }
+
+    /* Fade-in for cards */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card-enter { animation: fadeUp 0.25s ease both; }
+
+    /* Stagger cards */
+    #product-grid > *:nth-child(1) { animation-delay: 0ms; }
+    #product-grid > *:nth-child(2) { animation-delay: 40ms; }
+    #product-grid > *:nth-child(3) { animation-delay: 80ms; }
+    #product-grid > *:nth-child(4) { animation-delay: 120ms; }
+    #product-grid > *:nth-child(5) { animation-delay: 160ms; }
+    #product-grid > *:nth-child(6) { animation-delay: 200ms; }
+    #product-grid > *:nth-child(7) { animation-delay: 240ms; }
+    #product-grid > *:nth-child(8) { animation-delay: 280ms; }
+    #product-grid > *:nth-child(9) { animation-delay: 320ms; }
+
+    /* Filter chip */
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #e8f4fd; color: #005e91; border: 1px solid #b6d9f5;
+      border-radius: 999px; font-size: 12px; font-weight: 700;
+      padding: 4px 12px 4px 10px; white-space: nowrap;
+    }
+    .chip button { color: #0076b6; line-height: 1; }
+    .chip button:hover { color: #003d6b; }
+
+    /* Search bar typing state */
+    #search-wrapper.is-active {
+      border-color: #0076b6;
+      box-shadow: 0 0 0 4px rgba(0, 118, 182, 0.12);
+    }
+
+    /* Dual Range Slider Styles */
+    .slider-thumb {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      appearance: none;
+      background: transparent;
+      pointer-events: none;
+      z-index: 10;
+      outline: none;
+    }
+    .slider-thumb::-webkit-slider-thumb {
+      pointer-events: auto;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #0076b6;
+      border: 3px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+    .slider-thumb::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+    .slider-thumb::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.1);
+      background: #005e91;
+    }
+    
+    .slider-thumb::-moz-range-thumb {
+      pointer-events: auto;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #0076b6;
+      border: 3px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+    .slider-thumb::-moz-range-thumb:hover {
+      transform: scale(1.15);
+    }
+    .slider-thumb::-moz-range-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.1);
+      background: #005e91;
+    }
+  </style>
 </head>
-<body class="bg-[#eef8ff] m-0 flex flex-col min-h-screen overflow-x-hidden">
+<body class="bg-slate-50 m-0 flex flex-col min-h-screen overflow-x-hidden">
   <Navbar />
 
   <main class="flex-grow py-10 sm:py-14 px-4 sm:px-6 md:px-10">
     <div class="max-w-7xl mx-auto">
-      <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+
+      <!-- Header -->
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p class="text-sm uppercase tracking-[0.2em] text-[#0076b6] font-semibold">Dynamic Catalog</p>
-          <h1 class="text-3xl md:text-5xl font-bold text-slate-900">Find The Right Product</h1>
+          <p class="text-sm uppercase tracking-[0.2em] text-[#0076b6] font-bold mb-2">Dynamic Catalog</p>
+          <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">Find The Right Product</h1>
         </div>
-        <a href="/contact" class="rounded-full bg-[#0076b6] text-white px-6 py-3 font-semibold hover:bg-[#005e91] transition">Need Expert Help?</a>
+        <a href="/contact" class="rounded-full bg-[#0076b6] text-white px-7 py-3.5 font-semibold shadow-lg shadow-[#0076b6]/20 hover:bg-[#005e91] hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          Need Expert Help?
+        </a>
       </div>
 
-      <section class="bg-white rounded-3xl border border-[#d7ebf9] shadow-[0_14px_50px_rgba(0,86,135,0.08)] p-5 md:p-8 mb-8">
-        <form id="filters-form" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end" autocomplete="off">
-          <div class="md:col-span-4">
-            <input id="q" name="q" class="w-full rounded-xl border border-slate-200 px-4 py-2.5" placeholder="Name or description" />
+      <!-- Filters Section -->
+      <div class="mb-10 relative z-10">
+
+        <!-- Search Bar -->
+        <div id="search-wrapper" class="relative bg-white rounded-2xl p-2 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-100 flex items-center transition-all duration-200 mb-4">
+          <div class="pl-4 pr-2 text-[#0076b6] flex-shrink-0">
+            <svg id="search-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <svg id="search-spinner" class="w-6 h-6 hidden spin text-[#0076b6]" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+            </svg>
           </div>
-          <div class="md:col-span-3">
-            <label class="block text-sm font-semibold text-slate-700 mb-1" for="category_id">Category</label>
-            <select id="category_id" name="category_id" class="w-full rounded-xl border border-slate-200 px-4 py-2.5">
+
+          <input
+            id="q"
+            name="q"
+            class="w-full bg-transparent outline-none py-3 text-slate-800 font-semibold placeholder:text-slate-400 placeholder:font-medium text-lg sm:text-xl"
+            placeholder="Type to search products…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+
+          <button id="clear-search" type="button" class="hidden mr-2 text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0 p-1 rounded-lg hover:bg-slate-100" title="Clear search">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Controls Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          
+          <!-- Category -->
+          <div class="lg:col-span-3 relative group flex items-center bg-white border border-slate-200 rounded-xl hover:border-[#0076b6] transition-colors shadow-sm focus-within:border-[#0076b6] focus-within:ring-2 focus-within:ring-[#0076b6]/20 h-[56px]">
+            <div class="pl-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            </div>
+            <select id="category_id" name="category_id" class="appearance-none bg-transparent outline-none text-slate-700 font-semibold py-3 pl-3 pr-10 cursor-pointer w-full h-full">
               <option value="">All Categories</option>
             </select>
+            <div class="absolute right-4 pointer-events-none text-slate-400 group-hover:text-[#0076b6] transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+            </div>
           </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-semibold text-slate-700 mb-1" for="min_price">Min Price</label>
-            <input id="min_price" name="min_price" type="number" min="0" step="0.01" class="w-full rounded-xl border border-slate-200 px-4 py-2.5" />
-          </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-semibold text-slate-700 mb-1" for="max_price">Max Price</label>
-            <input id="max_price" name="max_price" type="number" min="0" step="0.01" class="w-full rounded-xl border border-slate-200 px-4 py-2.5" />
-          </div>
-          <div class="md:col-span-1">
-            <label class="block text-sm font-semibold text-slate-700 mb-1" for="sort">Sort</label>
-            <select id="sort" name="sort" class="w-full rounded-xl border border-slate-200 px-2 py-2.5">
-              <option value="newest">Newest</option>
-              <option value="price_asc">Price ↑</option>
-              <option value="price_desc">Price ↓</option>
-              <option value="name_asc">Name A-Z</option>
-              <option value="name_desc">Name Z-A</option>
+
+          <!-- Sort -->
+          <div class="lg:col-span-3 relative group flex items-center bg-white border border-slate-200 rounded-xl hover:border-[#0076b6] transition-colors shadow-sm focus-within:border-[#0076b6] focus-within:ring-2 focus-within:ring-[#0076b6]/20 h-[56px]">
+            <div class="pl-4 text-slate-400 group-hover:text-[#0076b6] transition-colors pointer-events-none">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+            </div>
+            <select id="sort" name="sort" class="appearance-none bg-transparent outline-none text-slate-700 font-semibold py-3 pl-3 pr-10 cursor-pointer w-full h-full">
+              <option value="newest">Newest First</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="name_asc">Name: A to Z</option>
             </select>
+            <div class="absolute right-4 pointer-events-none text-slate-400 group-hover:text-[#0076b6] transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+            </div>
           </div>
-          <div class="md:col-span-12 flex gap-3 justify-end pt-2">
-            <button type="button" id="reset-btn" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100">Reset</button>
-            <button type="submit" class="rounded-xl bg-[#0076b6] px-5 py-2 text-white font-semibold hover:bg-[#005e91]">Apply</button>
-          </div>
-        </form>
-      </section>
 
+          <!-- Refined Price Range Selector -->
+          <div class="lg:col-span-6 flex flex-col justify-center bg-white border border-slate-200 rounded-xl px-5 hover:border-[#0076b6] transition-colors shadow-sm focus-within:border-[#0076b6] focus-within:ring-2 focus-within:ring-[#0076b6]/20 h-[56px] relative">
+            <span class="absolute -top-2.5 left-4 bg-white px-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">Price Range (LKR)</span>
+            
+            <div class="flex items-center gap-4 w-full pt-1">
+              <!-- Min Input -->
+              <input id="min_price" name="min_price" type="number" min="0" class="w-24 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-bold py-1.5 px-2 text-center text-sm outline-none focus:border-[#0076b6] focus:bg-white transition-colors" placeholder="Min" />
+              
+              <!-- Slider Container -->
+              <div class="relative flex-1 h-1.5 bg-slate-100 rounded-full mx-1">
+                <div id="slider-track" class="absolute top-0 bottom-0 bg-[#0076b6] rounded-full pointer-events-none" style="left: 0%; right: 0%;"></div>
+                <input type="range" id="min_slider" min="0" max="1000000" step="1000" value="0" class="slider-thumb">
+                <input type="range" id="max_slider" min="0" max="1000000" step="1000" value="1000000" class="slider-thumb">
+              </div>
+
+              <!-- Max Input -->
+              <input id="max_price" name="max_price" type="number" min="0" class="w-24 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-bold py-1.5 px-2 text-center text-sm outline-none focus:border-[#0076b6] focus:bg-white transition-colors" placeholder="Max" />
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Filter State & Reset -->
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-4 min-h-[32px]">
+          <!-- Active filter chips -->
+          <div id="filter-chips" class="hidden flex-wrap gap-2 items-center">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide mr-1">Active:</span>
+          </div>
+          
+          <div class="flex-1"></div>
+
+          <!-- Reset -->
+          <button type="button" id="reset-btn" class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors px-3 py-1.5 outline-none focus:ring-2 focus:ring-slate-300 rounded-lg hover:bg-slate-100">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Results -->
       <section>
-        <div class="mb-4 flex items-center justify-between">
-          <p id="result-meta" class="text-sm text-slate-600">Loading products...</p>
+        <div class="mb-6 flex items-center justify-between">
+          <p id="result-meta" class="text-sm font-medium text-slate-500">Initializing catalog…</p>
         </div>
 
-        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
 
-        <div id="empty-state" class="hidden rounded-2xl bg-white border border-slate-200 p-10 text-center text-slate-600">
-          No products match your filters.
+        <div id="empty-state" class="hidden rounded-3xl bg-white border border-slate-200 p-16 text-center shadow-sm flex-col items-center justify-center">
+          <div class="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5">
+            <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800 mb-2">No products found</h3>
+          <p class="text-slate-500 max-w-md mx-auto mb-6">No items match your current filters. Try a different search or category.</p>
+          <button type="button" onclick="document.getElementById('reset-btn').click()" class="rounded-lg bg-slate-100 px-5 py-2.5 font-semibold text-slate-700 hover:bg-slate-200 transition-colors">Clear all filters</button>
         </div>
 
-        <div class="mt-8 flex items-center justify-between">
-          <button id="prev-page" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 disabled:opacity-40" disabled>Previous</button>
-          <p id="page-meta" class="text-sm text-slate-600">Page 1</p>
-          <button id="next-page" class="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 disabled:opacity-40" disabled>Next</button>
+        <!-- Pagination -->
+        <div class="mt-12 flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <button id="prev-page" class="flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 transition-all hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent" disabled>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Previous
+          </button>
+          <p id="page-meta" class="text-sm font-semibold text-slate-600 bg-slate-100 px-4 py-2 rounded-lg">Page 1</p>
+          <button id="next-page" class="flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 transition-all hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent" disabled>
+            Next
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </section>
     </div>
@@ -83,166 +256,357 @@ import Footer from '../components/footer.astro';
   <Footer />
 
   <script>
+    /* ───── Setup ───── */
     function getApiBase() {
       const host = window.location.hostname;
-      return (host === 'localhost' || host === '127.0.0.1') ? 'http://localhost:8000/public/api' : '/public/api';
+      return (host === 'localhost' || host === '127.0.0.1')
+        ? 'http://localhost:8000/public/api'
+        : '/public/api';
     }
 
-    const API_BASE = getApiBase();
-    const form = document.getElementById('filters-form') as HTMLFormElement | null;
-    const categorySelect = document.getElementById('category_id') as HTMLSelectElement | null;
-    const grid = document.getElementById('product-grid') as HTMLDivElement | null;
-    const emptyState = document.getElementById('empty-state') as HTMLDivElement | null;
-    const resultMeta = document.getElementById('result-meta') as HTMLParagraphElement | null;
-    const pageMeta = document.getElementById('page-meta') as HTMLParagraphElement | null;
-    const prevPageBtn = document.getElementById('prev-page') as HTMLButtonElement | null;
-    const nextPageBtn = document.getElementById('next-page') as HTMLButtonElement | null;
-    const resetBtn = document.getElementById('reset-btn') as HTMLButtonElement | null;
+    const API_BASE       = getApiBase();
+    const searchInput    = document.getElementById('q')              as HTMLInputElement;
+    const clearSearchBtn = document.getElementById('clear-search')    as HTMLButtonElement;
+    const searchIcon     = document.getElementById('search-icon')     as HTMLElement;
+    const searchSpinner  = document.getElementById('search-spinner')  as HTMLElement;
+    const searchWrapper  = document.getElementById('search-wrapper')  as HTMLElement;
+    const categorySelect = document.getElementById('category_id')     as HTMLSelectElement;
+    const sortSelect     = document.getElementById('sort')            as HTMLSelectElement;
+    
+    // Price Slider Elements
+    const minPriceInput  = document.getElementById('min_price')       as HTMLInputElement;
+    const maxPriceInput  = document.getElementById('max_price')       as HTMLInputElement;
+    const minSlider      = document.getElementById('min_slider')      as HTMLInputElement;
+    const maxSlider      = document.getElementById('max_slider')      as HTMLInputElement;
+    const sliderTrack    = document.getElementById('slider-track')    as HTMLElement;
+    const MAX_SLIDER_VAL = 1000000;
 
-    let currentPage = 1;
-    let totalPages = 1;
-    const pageSize = 9;
+    const grid           = document.getElementById('product-grid')    as HTMLDivElement;
+    const emptyState     = document.getElementById('empty-state')     as HTMLDivElement;
+    const resultMeta     = document.getElementById('result-meta')     as HTMLParagraphElement;
+    const pageMeta       = document.getElementById('page-meta')       as HTMLParagraphElement;
+    const prevPageBtn    = document.getElementById('prev-page')       as HTMLButtonElement;
+    const nextPageBtn    = document.getElementById('next-page')       as HTMLButtonElement;
+    const resetBtn       = document.getElementById('reset-btn')       as HTMLButtonElement;
+    const filterChips    = document.getElementById('filter-chips')    as HTMLDivElement;
 
-    type CategorySummary = {
-      id: number;
-      name: string;
-      product_count: number;
-    };
+    let currentPage  = 1;
+    let totalPages   = 1;
+    const PAGE_SIZE  = 9;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let categoryMap: Record<string, string> = {};
 
+    /* ───── Types ───── */
+    type CategorySummary = { id: number; name: string; product_count: number };
     type ProductCard = {
-      id: number;
-      name: string;
-      description?: string | null;
-      price?: number | null;
-      thumbnail?: string | null;
+      id: number; name: string; description?: string | null;
+      price?: number | null; thumbnail?: string | null;
       image_count?: number | null;
       categories?: Array<{ id?: number; name: string }>;
     };
 
-    function currency(value: number | string | null | undefined) {
-      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(value || 0));
+    /* ───── Helpers ───── */
+    function currency(v: number | string | null | undefined) {
+      return new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR' }).format(Number(v || 0));
     }
-
     function encodeHtml(s: string | number | null | undefined) {
       return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+        .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+        .replaceAll('"','&quot;').replaceAll("'",'&#39;');
     }
 
-    function getFilterParams() {
-      if (!form) return new URLSearchParams();
-      const fd = new FormData(form);
-      const p = new URLSearchParams();
-      const keys = ['q', 'category_id', 'min_price', 'max_price', 'sort'];
-      for (const key of keys) {
-        const val = (fd.get(key) || '').toString().trim();
-        if (val !== '') p.set(key, val);
+    /* ───── Slider Logic ───── */
+    function updateSliderTrack() {
+      const minV = parseInt(minSlider.value);
+      const maxV = parseInt(maxSlider.value);
+      const percent1 = (minV / MAX_SLIDER_VAL) * 100;
+      const percent2 = (maxV / MAX_SLIDER_VAL) * 100;
+      sliderTrack.style.left = percent1 + '%';
+      sliderTrack.style.right = (100 - percent2) + '%';
+    }
+
+    function syncInputsToSliders() {
+      let minV = parseInt(minPriceInput.value) || 0;
+      let maxV = parseInt(maxPriceInput.value) || MAX_SLIDER_VAL;
+
+      if (minV < 0) minV = 0;
+      if (maxV > MAX_SLIDER_VAL) maxV = MAX_SLIDER_VAL;
+      if (minV > maxV) {
+        const temp = minV; minV = maxV; maxV = temp;
       }
-      p.set('page', String(currentPage));
-      p.set('limit', String(pageSize));
-      return p;
+
+      minSlider.value = minV.toString();
+      maxSlider.value = maxV.toString();
+      updateSliderTrack();
     }
 
-    function cardTemplate(product: ProductCard) {
-      const badgeHtml = (product.categories || []).map(c => `<span class="inline-block text-xs px-2.5 py-1 rounded-full bg-[#edf7ff] border border-[#cfe9fb] text-[#005f92]">${encodeHtml(c.name)}</span>`).join(' ');
-      const imageHtml = product.thumbnail
-        ? `<img src="${encodeHtml(product.thumbnail)}" alt="${encodeHtml(product.name)}" class="h-48 w-full object-cover" loading="lazy" />`
-        : `<div class="h-48 w-full bg-gradient-to-br from-[#dff2ff] to-[#f1fbff] flex items-center justify-center text-sm text-slate-500">No image</div>`;
+    // Handles user dragging the min thumb
+    minSlider.addEventListener('input', () => {
+      let minV = parseInt(minSlider.value);
+      let maxV = parseInt(maxSlider.value);
+      if (minV > maxV - 1000) {
+        minV = maxV - 1000;
+        minSlider.value = minV.toString();
+      }
+      minPriceInput.value = minV === 0 ? '' : minV.toString();
+      updateSliderTrack();
+      triggerSearch(500);
+    });
+
+    // Handles user dragging the max thumb
+    maxSlider.addEventListener('input', () => {
+      let minV = parseInt(minSlider.value);
+      let maxV = parseInt(maxSlider.value);
+      if (maxV < minV + 1000) {
+        maxV = minV + 1000;
+        maxSlider.value = maxV.toString();
+      }
+      maxPriceInput.value = maxV === MAX_SLIDER_VAL ? '' : maxV.toString();
+      updateSliderTrack();
+      triggerSearch(500);
+    });
+
+    /* ───── Filter state helpers ───── */
+    function getFilters() {
+      return {
+        q:           searchInput.value.trim(),
+        category_id: categorySelect.value,
+        min_price:   minPriceInput.value.trim(),
+        max_price:   maxPriceInput.value.trim(),
+        sort:        sortSelect.value,
+      };
+    }
+
+    /* ───── Active filter chips ───── */
+    function renderChips() {
+      const f = getFilters();
+      const chips: string[] = [];
+
+      if (f.q) chips.push(`<span class="chip">🔍 "${encodeHtml(f.q)}" <button data-clear="q" title="Remove">✕</button></span>`);
+      if (f.category_id) chips.push(`<span class="chip">📦 ${encodeHtml(categoryMap[f.category_id] || f.category_id)} <button data-clear="category_id" title="Remove">✕</button></span>`);
+      if (f.min_price) chips.push(`<span class="chip">LKR ≥ ${encodeHtml(f.min_price)} <button data-clear="min_price" title="Remove">✕</button></span>`);
+      if (f.max_price) chips.push(`<span class="chip">LKR ≤ ${encodeHtml(f.max_price)} <button data-clear="max_price" title="Remove">✕</button></span>`);
+      if (f.sort && f.sort !== 'newest') {
+        const labels: Record<string,string> = { price_asc:'Price ↑', price_desc:'Price ↓', name_asc:'Name A–Z' };
+        chips.push(`<span class="chip">↕ ${labels[f.sort] || f.sort} <button data-clear="sort" title="Remove">✕</button></span>`);
+      }
+
+      if (chips.length) {
+        filterChips.innerHTML = `<span style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-right:4px;">Active:</span>` + chips.join('');
+        filterChips.style.display = 'flex';
+      } else {
+        filterChips.style.display = 'none';
+      }
+    }
+
+    filterChips.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('[data-clear]') as HTMLElement | null;
+      if (!btn) return;
+      const field = btn.dataset.clear!;
+      if (field === 'q')           { searchInput.value = ''; updateClearButton(); }
+      if (field === 'category_id') categorySelect.value = '';
+      if (field === 'min_price')   { minPriceInput.value = ''; syncInputsToSliders(); }
+      if (field === 'max_price')   { maxPriceInput.value = ''; syncInputsToSliders(); }
+      if (field === 'sort')        sortSelect.value = 'newest';
+      currentPage = 1;
+      loadProducts();
+    });
+
+    /* ───── Clear-X button on search input ───── */
+    function updateClearButton() {
+      clearSearchBtn.style.display = searchInput.value ? 'block' : 'none';
+    }
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      updateClearButton();
+      currentPage = 1;
+      loadProducts();
+      searchInput.focus();
+    });
+
+    /* ───── Loading indicator ───── */
+    function setLoading(on: boolean) {
+      searchIcon.style.display    = on ? 'none'  : 'block';
+      searchSpinner.style.display = on ? 'block' : 'none';
+    }
+
+    /* ───── Skeleton ───── */
+    function skeletonHtml() {
+      return Array(6).fill(`
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm animate-pulse flex flex-col h-full">
+          <div class="bg-slate-200 rounded-2xl aspect-[4/3] w-full mb-5"></div>
+          <div class="h-6 bg-slate-200 rounded-lg w-3/4 mb-3"></div>
+          <div class="h-4 bg-slate-200 rounded-lg w-full mb-2"></div>
+          <div class="h-4 bg-slate-200 rounded-lg w-5/6 mb-4"></div>
+          <div class="mt-auto flex justify-between items-center pt-4">
+            <div class="h-7 bg-slate-200 rounded-lg w-1/3"></div>
+            <div class="h-5 bg-slate-200 rounded-lg w-1/4"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ───── Card template ───── */
+    function cardTemplate(p: ProductCard) {
+      const badges = (p.categories || []).map(c =>
+        `<span class="inline-flex items-center text-xs font-bold px-3 py-1 rounded-full bg-[#f0f8ff] text-[#006ba6] border border-[#d6ecfb]">${encodeHtml(c.name)}</span>`
+      ).join(' ');
+      const img = p.thumbnail
+        ? `<img src="${encodeHtml(p.thumbnail)}" alt="${encodeHtml(p.name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />`
+        : `<div class="w-full h-full bg-slate-100 flex items-center justify-center text-sm font-medium text-slate-400">No image available</div>`;
 
       return `
-        <article class="bg-white rounded-3xl overflow-hidden border border-[#d6eaf8] shadow-[0_10px_30px_rgba(0,76,122,0.08)] flex flex-col">
-          ${imageHtml}
-          <div class="p-5 flex flex-col flex-1">
-            <div class="mb-2 flex items-start justify-between gap-3">
-              <h3 class="text-lg font-bold text-slate-900">${encodeHtml(product.name)}</h3>
-              <span class="text-xs text-slate-500">${product.image_count || 0} imgs</span>
+        <a href="/product?id=${encodeURIComponent(p.id)}" class="card-enter group block h-full outline-none focus:ring-4 focus:ring-[#0076b6]/20 rounded-3xl transition-all">
+          <article class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-[#005e91]/5 transition-all duration-300 flex flex-col h-full hover:-translate-y-1">
+            <div class="relative overflow-hidden aspect-[4/3] bg-slate-50 border-b border-slate-100">
+              ${img}
+              <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-slate-600 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                ${p.image_count || 0}
+              </div>
             </div>
-            <p class="text-slate-600 text-sm mb-4 line-clamp-3">${encodeHtml(product.description || 'No description available.')}</p>
-            <div class="mb-4 flex flex-wrap gap-2">${badgeHtml}</div>
-            <div class="mt-auto flex items-center justify-between">
-              <p class="text-[#00679e] font-bold text-lg">${currency(product.price)}</p>
-              <a href="/product?id=${encodeURIComponent(product.id)}" class="text-sm font-semibold text-[#0076b6] hover:text-[#005e91]">View Details</a>
+            <div class="p-6 flex flex-col flex-1">
+              <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#0076b6] transition-colors line-clamp-1">${encodeHtml(p.name)}</h3>
+              <p class="text-slate-500 text-sm mb-5 line-clamp-2 leading-relaxed">${encodeHtml(p.description || 'No description available.')}</p>
+              <div class="mb-5 flex flex-wrap gap-2">${badges}</div>
+              <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+                <p class="text-[#0076b6] font-extrabold text-xl">${currency(p.price)}</p>
+                <span class="text-sm font-bold text-slate-400 group-hover:text-[#0076b6] transition-colors flex items-center gap-1">
+                  Details
+                  <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </span>
+              </div>
             </div>
-          </div>
-        </article>
-      `;
+          </article>
+        </a>`;
     }
 
+    /* ───── Load categories ───── */
     async function loadCategories() {
-      if (!categorySelect) return;
-      const res = await fetch(`${API_BASE}/categories.php`, { method: 'GET' });
-      if (!res.ok) return;
-      const data: { categories?: CategorySummary[] } = await res.json();
-      const opts = ['<option value="">All Categories</option>'];
-      for (const c of (data.categories || [])) {
-        opts.push(`<option value="${encodeHtml(String(c.id))}">${encodeHtml(c.name)} (${c.product_count})</option>`);
-      }
-      categorySelect.innerHTML = opts.join('');
+      try {
+        const res = await fetch(`${API_BASE}/categories.php`);
+        if (!res.ok) return;
+        const data: { categories?: CategorySummary[] } = await res.json();
+        const opts = ['<option value="">All Categories</option>'];
+        for (const c of (data.categories || [])) {
+          categoryMap[String(c.id)] = c.name;
+          opts.push(`<option value="${encodeHtml(String(c.id))}">${encodeHtml(c.name)} (${c.product_count})</option>`);
+        }
+        categorySelect.innerHTML = opts.join('');
+      } catch {}
     }
 
+    /* ───── Load products ───── */
     async function loadProducts() {
-      if (!grid || !emptyState || !resultMeta || !pageMeta || !prevPageBtn || !nextPageBtn) return;
-      grid.innerHTML = '';
-      resultMeta.textContent = 'Loading...';
-      emptyState.classList.add('hidden');
+      emptyState.style.display = 'none';
+      grid.style.display       = 'grid';
+      grid.innerHTML           = skeletonHtml();
+      resultMeta.textContent   = 'Searching…';
+      setLoading(true);
+      renderChips();
 
-      const params = getFilterParams();
-      const res = await fetch(`${API_BASE}/products.php?${params.toString()}`, { method: 'GET' });
-      if (!res.ok) {
-        resultMeta.textContent = 'Failed to load products.';
-        return;
+      const f = getFilters();
+      const p = new URLSearchParams();
+      if (f.q)           p.set('q',           f.q);
+      if (f.category_id) p.set('category_id', f.category_id);
+      if (f.min_price)   p.set('min_price',   f.min_price);
+      if (f.max_price)   p.set('max_price',   f.max_price);
+      if (f.sort)        p.set('sort',        f.sort);
+      p.set('page',  String(currentPage));
+      p.set('limit', String(PAGE_SIZE));
+
+      try {
+        const res = await fetch(`${API_BASE}/products.php?${p.toString()}`);
+        if (!res.ok) throw new Error('Network error');
+
+        const data: {
+          products?: ProductCard[];
+          meta?: { page?: number; total_pages?: number; total?: number };
+        } = await res.json();
+
+        const products = data.products || [];
+        const meta = data.meta || {};
+        totalPages = Math.max(1, meta.total_pages || 1);
+
+        resultMeta.innerHTML = `<span class="text-slate-800 font-bold">${meta.total || 0}</span> product(s) found`;
+        pageMeta.textContent  = `Page ${meta.page || 1} of ${totalPages}`;
+        prevPageBtn.disabled  = currentPage <= 1;
+        nextPageBtn.disabled  = currentPage >= totalPages;
+
+        if (!products.length) {
+          grid.style.display       = 'none';
+          emptyState.style.display = 'flex';
+        } else {
+          grid.innerHTML = products.map(cardTemplate).join('');
+        }
+      } catch {
+        grid.innerHTML         = '';
+        resultMeta.textContent = 'Failed to load products. Please try again.';
+      } finally {
+        setLoading(false);
       }
-
-      const data: { products?: ProductCard[]; meta?: { page?: number; total_pages?: number; total?: number } } = await res.json();
-      const products = data.products || [];
-      const meta = data.meta || { page: 1, total_pages: 1, total: 0 };
-      totalPages = Math.max(1, meta.total_pages || 1);
-
-      resultMeta.textContent = `${meta.total || 0} product(s) found`;
-      pageMeta.textContent = `Page ${meta.page || 1} of ${totalPages}`;
-
-      prevPageBtn.disabled = currentPage <= 1;
-      nextPageBtn.disabled = currentPage >= totalPages;
-
-      if (!products.length) {
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      grid.innerHTML = products.map(cardTemplate).join('');
     }
 
-    form?.addEventListener('submit', (e: SubmitEvent) => {
-      e.preventDefault();
+    /* ───── Debounced trigger ───── */
+    function triggerSearch(delay = 300) {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentPage = 1;
+        loadProducts();
+      }, delay);
+    }
+
+    /* ───── Event listeners ───── */
+
+    // Live search while typing (debounced 300ms)
+    searchInput.addEventListener('input', () => {
+      updateClearButton();
+      searchWrapper.classList.toggle('is-active', !!searchInput.value);
+      triggerSearch(300);
+    });
+    searchInput.addEventListener('focus',  () => searchWrapper.classList.add('is-active'));
+    searchInput.addEventListener('blur',   () => { if (!searchInput.value) searchWrapper.classList.remove('is-active'); });
+
+    // Inputs (trigger slider sync and search)
+    categorySelect.addEventListener('change', () => triggerSearch(0));
+    sortSelect.addEventListener('change',     () => triggerSearch(0));
+    minPriceInput.addEventListener('input',   () => { syncInputsToSliders(); triggerSearch(500); });
+    maxPriceInput.addEventListener('input',   () => { syncInputsToSliders(); triggerSearch(500); });
+
+    // Reset
+    resetBtn.addEventListener('click', () => {
+      searchInput.value    = '';
+      categorySelect.value = '';
+      minPriceInput.value  = '';
+      maxPriceInput.value  = '';
+      sortSelect.value     = 'newest';
+      
+      minSlider.value = '0';
+      maxSlider.value = MAX_SLIDER_VAL.toString();
+      updateSliderTrack();
+
+      updateClearButton();
+      searchWrapper.classList.remove('is-active');
       currentPage = 1;
       loadProducts();
     });
 
-    resetBtn?.addEventListener('click', () => {
-      if (!form) return;
-      form.reset();
-      currentPage = 1;
-      loadProducts();
+    // Pagination
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) { currentPage--; loadProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    });
+    nextPageBtn.addEventListener('click', () => {
+      if (currentPage < totalPages) { currentPage++; loadProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     });
 
-    prevPageBtn?.addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage -= 1;
-        loadProducts();
-      }
+    // Enter key still works
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { if (debounceTimer) clearTimeout(debounceTimer); currentPage = 1; loadProducts(); }
     });
 
-    nextPageBtn?.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        currentPage += 1;
-        loadProducts();
-      }
-    });
-
-    loadCategories().then(loadProducts);
+    /* ───── Boot ───── */
+    updateSliderTrack();
+    loadCategories().then(() => loadProducts());
   </script>
 </body>
 </html>

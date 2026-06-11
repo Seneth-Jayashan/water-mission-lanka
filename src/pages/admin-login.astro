@@ -17,6 +17,24 @@ import Layout from '../layouts/Layout.astro';
         <span>Please sign in to manage the admin dashboard.</span>
       </div>
 
+      <div id="create-admin-section" style="display: none;" class="create-admin-alert" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+        <div class="alert-content" style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; text-align: left;">
+          <svg width="24" height="24" style="color: #f59e0b; flex-shrink: 0; margin-top: 2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <p style="color: #475569; font-size: 13px; margin: 0; line-height: 1.5;">
+            No admin account exists. Click below to create one using environment credentials.
+          </p>
+        </div>
+        <button id="create-admin-btn" type="button" class="create-admin-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+          Create Admin Account
+        </button>
+      </div>
+      
+
       <form id="login-form" class="login-form">
         <div class="field">
           <label for="username">Username</label>
@@ -109,6 +127,67 @@ import Layout from '../layouts/Layout.astro';
     font-size: 14px;
     line-height: 1.6;
   }
+
+  /* UPDATED CSS FOR ADMIN BUTTON SECTION ONLY */
+  .create-admin-alert {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 24px;
+  }
+
+  .alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .alert-icon {
+    width: 20px;
+    height: 20px;
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .create-admin-alert p {
+    color: #475569;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .create-admin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 200ms ease;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  }
+
+  .create-admin-btn:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+  }
+
+  .create-admin-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  /* END UPDATED CSS */
 
   .login-form {
     display: grid;
@@ -210,16 +289,57 @@ import Layout from '../layouts/Layout.astro';
 <script type="module">
 const form = document.getElementById('login-form');
 const msg = document.getElementById('message');
+const BACKEND_URL = 'http://localhost:8000/public/api/login.php';
+
+// Check if admin exists on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch(BACKEND_URL);
+    const data = await res.json();
+    if (data.success && !data.adminExists) {
+      document.getElementById('create-admin-section').style.display = 'block';
+    }
+  } catch (err) {
+    console.error('Failed to check admin status:', err);
+  }
+});
+
+const createAdminBtn = document.getElementById('create-admin-btn');
+if (createAdminBtn) {
+  createAdminBtn.addEventListener('click', async () => {
+    msg.style.color = '#334155';
+    msg.textContent = 'Creating admin...';
+    try {
+      const res = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create_admin' })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        msg.style.color = '#10b981'; // Green success color
+        msg.textContent = data.message;
+        document.getElementById('create-admin-section').style.display = 'none';
+      } else {
+        msg.style.color = '#dc2626';
+        msg.textContent = data.error || 'Failed to create admin';
+      }
+    } catch (err) {
+      msg.style.color = '#dc2626';
+      msg.textContent = 'Network error during creation';
+      console.error(err);
+    }
+  });
+}
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  msg.style.color = '#dc2626';
   msg.textContent = '';
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
 
   try {
-    // Use full backend URL so the request reaches the PHP server (not Astro dev server)
-    const BACKEND_URL = 'http://localhost:8000/public/api/login.php';
     const res = await fetch(BACKEND_URL, {
       method: 'POST',
       credentials: 'include',
@@ -241,6 +361,7 @@ form.addEventListener('submit', async (e) => {
     }
 
     if (res.ok && payload && payload.success) {
+      msg.style.color = '#10b981';
       msg.textContent = 'Login successful — opening admin panel...';
       // redirect to frontend admin dashboard (stays on Astro, not the PHP backend)
       window.location.href = '/admin';

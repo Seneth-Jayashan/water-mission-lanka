@@ -6,6 +6,11 @@ $DB_NAME = 'water_mission';
 $DB_USER = 'root';
 $DB_PASS = '';
 
+// Initial admin credentials are read from environment variables.
+// Set these in your web server, shell profile, or launch script.
+$ADMIN_USERNAME = getenv('ADMIN_USERNAME');
+$ADMIN_PASSWORD = getenv('ADMIN_PASSWORD');
+
 try {
     $pdo = new PDO("mysql:host={$DB_HOST};dbname={$DB_NAME};charset=utf8mb4", $DB_USER, $DB_PASS, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
