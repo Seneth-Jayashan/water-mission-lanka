@@ -266,7 +266,7 @@ const { pageTitle = 'Dashboard' } = Astro.props;
           Categories
         </a>
         <div class="sidebar-nav-label" style="margin-top: 16px;">Tools</div>
-        <a href="http://localhost:8000/public/products_export.php" class="sidebar-link" target="_blank">
+        <a href="http://localhost/backend/public/products_export.php" class="sidebar-link" target="_blank">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Export CSV
         </a>
@@ -344,7 +344,7 @@ const { pageTitle = 'Dashboard' } = Astro.props;
     // ========================================
     function getApiBase() {
       const host = window.location.hostname;
-      return (host === 'localhost' || host === '127.0.0.1') ? 'http://localhost:8000/public/api' : '/public/api';
+      return (host === 'localhost' || host === '127.0.0.1') ? 'http://localhost/backend/public/api' : '/public/api';
     }
     window.API = getApiBase();
 
